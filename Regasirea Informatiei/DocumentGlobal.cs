@@ -52,19 +52,22 @@ public class DocumentGlobal
 
     public void ScrieDate()
     {
-        using (var scriitor = new StreamWriter(_numeFisier, true))
+        using (var scriitor = new StreamWriter(_numeFisier))
         {
             foreach (string atribut in _listaAtribute)
             {
                 scriitor.WriteLine(atribut);
                 scriitor.Flush();
             }
-
+            
+            scriitor.WriteLine($"\n@data\n");
+            
             foreach (string document in _documenteNormalizate)
             {
                 scriitor.WriteLine(document);
                 scriitor.Flush();
             }
+            
         }
     }
 
@@ -81,9 +84,9 @@ public class DocumentGlobal
 
         return false;
     }
-    private void AdaugaDocumentInLista(string document)
+    public void AdaugaDocumentInLista(string titlu, string document)
     {
-        if (!_documenteNormalizate.Contains(document))
+        if (!EsteDocumentInLista(titlu))
         {
             _documenteNormalizate.Add(document);
         }
@@ -94,6 +97,16 @@ public class DocumentGlobal
         if (!_listaAtribute.Contains(atribut))
         {
             _listaAtribute.Add(atribut);
+        }
+    }
+    public void AdaugaAtributeInLista(IEnumerable<string> atribute)
+    {
+        foreach (var atribut in atribute)
+        {
+            if (!_listaAtribute.Contains(atribut))
+            {
+                _listaAtribute.Add($"@{atribut}");
+            }
         }
     }
     

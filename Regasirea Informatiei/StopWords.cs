@@ -1,13 +1,15 @@
 namespace Regasirea_Informatiei;
 
 public class StopWords
-{ 
+{
+    private static string[] separatorCitire = new[] {"\r\n", "\r", "\n"};
     private readonly string _numeFisier = "StopWords.txt";
     private List<string> _listaStopWords = new List<string>();
 
     public List<string> ListaStopWords
     {
         get { return _listaStopWords; }
+        set { _listaStopWords = value; }
     }
 
     public StopWords()
@@ -29,7 +31,7 @@ public class StopWords
     {
         using (StreamReader cititorCuvinte = new StreamReader(_numeFisier))
         {
-            string[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ');
+            string[] cuvinte = cititorCuvinte.ReadToEnd().Split(separatorCitire,StringSplitOptions.None);
             foreach (string cuvant in cuvinte)
             {
                 _listaStopWords.Add(cuvant);

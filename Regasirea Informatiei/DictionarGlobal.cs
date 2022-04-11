@@ -3,8 +3,12 @@ namespace Regasirea_Informatiei;
 public class DictionarGlobal
 {
     private readonly string _numeFisier = "Dictionar.txt";
-    private SortedSet<string> _dictionarCuvinte = new SortedSet<string>();
+    private List<string> _dictionarCuvinte = new List<string>();
 
+    public List<string> DictionarCuvinte
+    {
+        get{return _dictionarCuvinte;}
+    }
     public DictionarGlobal()
     {
         bool fisierulExista = File.Exists(_numeFisier);
@@ -29,7 +33,8 @@ public class DictionarGlobal
             {
                 _dictionarCuvinte.Add(cuvant);
             }
-        }
+        } 
+        _dictionarCuvinte.Sort();
     }
 
     public void ScrieCuvinteleInFisier()
@@ -44,12 +49,16 @@ public class DictionarGlobal
         }
     }
 
-    public void AdaugaCuvantInLista(string cuvant)
+    public void AdaugaCuvinteInLista(IEnumerable<string> cuvinte)
     {
-        if (!_dictionarCuvinte.Contains(cuvant))
+        foreach(string cuvant in cuvinte)
         {
-            _dictionarCuvinte.Add(cuvant);
-            ScrieCuvinteleInFisier();
+            if (!_dictionarCuvinte.Contains(cuvant))
+            {
+                _dictionarCuvinte.Add(cuvant);
+            }
         }
+        _dictionarCuvinte.Sort();
+        ScrieCuvinteleInFisier();
     }
 }

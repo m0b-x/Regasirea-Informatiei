@@ -4,7 +4,7 @@ public static class UtilitatiCuvinte
 {
     public static bool EsteCuvantValid(string cuvant)
     {
-        if (!AreCaractereSpeciale(cuvant))
+        if (!AreCaractereSpeciale(cuvant) && !ContineDoarCifre(cuvant) && !String.IsNullOrEmpty(cuvant))
         {
             return true;
         }
@@ -50,7 +50,18 @@ public static class UtilitatiCuvinte
 
         return true;
     }
+    private static bool ContineDoarCifre(string cuvant)
+    {
+        foreach (Char caracter in cuvant)
+        {
+            if (!Char.IsDigit(caracter))
+            {
+                return false;
+            }
+        }
 
+        return true;
+    }
     private static bool ContineDoarLitereMari(string cuvant)
     {
         for (int caracter = 0; caracter < cuvant.Length; caracter++)
