@@ -2,21 +2,21 @@ namespace Regasirea_Informatiei;
 
 public class DictionarGlobal
 {
-    private readonly string numeFisier = "Dictionar.txt";
-    private SortedSet<string> dictionarCuvinte = new SortedSet<string>();
+    private readonly string _numeFisier = "Dictionar.txt";
+    private SortedSet<string> _dictionarCuvinte = new SortedSet<string>();
 
-    private DictionarGlobal()
+    public DictionarGlobal()
     {
-        using (var tw = new StreamWriter(numeFisier, true))
+        using (var scriitor = new StreamWriter(_numeFisier, true))
         {
-            bool fisierulExista = File.Exists(numeFisier);
+            bool fisierulExista = File.Exists(_numeFisier);
             if (fisierulExista)
             {
                 CitesteCuvinte();
             }
             else
             {
-                File.Create(numeFisier);
+                File.Create(_numeFisier);
             }
         }
 
@@ -25,21 +25,21 @@ public class DictionarGlobal
 
     private void CitesteCuvinte()
     {
-        using (StreamReader cititorCuvinte = new StreamReader(numeFisier))
+        using (StreamReader cititorCuvinte = new StreamReader(_numeFisier))
         {
             string[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ');
             foreach (string cuvant in cuvinte)
             {
-                dictionarCuvinte.Add(cuvant);
+                _dictionarCuvinte.Add(cuvant);
             }
         }
     }
 
     public void ScrieCuvinteleInFisier()
     {
-        using (StreamWriter scriitorCuvinte = new StreamWriter(numeFisier))
+        using (StreamWriter scriitorCuvinte = new StreamWriter(_numeFisier))
         {
-            foreach (var cuvant in dictionarCuvinte)
+            foreach (var cuvant in _dictionarCuvinte)
             {
                 scriitorCuvinte.Write($"{cuvant} ");
             }
@@ -48,9 +48,10 @@ public class DictionarGlobal
 
     public void AdaugaCuvantInLista(string cuvant)
     {
-        if (!dictionarCuvinte.Contains(cuvant))
+        if (!_dictionarCuvinte.Contains(cuvant))
         {
-            dictionarCuvinte.Add(cuvant);
+            _dictionarCuvinte.Add(cuvant);
+            ScrieCuvinteleInFisier();
         }
     }
 }
