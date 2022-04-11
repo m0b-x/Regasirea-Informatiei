@@ -1,27 +1,25 @@
 namespace Regasirea_Informatiei;
 
-public class FisierGlobal
+public class DocumentGlobal
 {
     private readonly string _numeFisier = "FisierGlobal.txt";
-    private List<string> _documenteNormalizate = new List<string>();
-    private SortedSet<string> _listaAtribute = new SortedSet<string>();
+    private List<string?> _documenteNormalizate = new List<string?>();
+    private SortedSet<string?> _listaAtribute = new SortedSet<string?>();
     
-    private static string _simbolAtribut = "@";
+    public static string SimbolAtribut = "@";
     
-    public FisierGlobal()
+    public DocumentGlobal()
     {
-        using (var scriitor = new StreamWriter(_numeFisier, true))
+        bool fisierulExista = File.Exists(_numeFisier);
+        if (fisierulExista)
         {
-            bool fisierulExista = File.Exists(_numeFisier);
-            if (fisierulExista)
-            {
-                CitesteDate();
-            }
-            else
-            {
-                File.Create(_numeFisier);
-            }
+            CitesteDate();
         }
+        else
+        {
+            File.Create(_numeFisier);
+        }
+
 
         Console.WriteLine("Fisier Global initializat.");
         
@@ -29,13 +27,13 @@ public class FisierGlobal
 
     private void CitesteDate()
     {
-        using (var cititor = new System.IO.StreamReader(@"C:\file.txt"))
+        using (var cititor = new StreamReader(_numeFisier))
         {
             while (!cititor.EndOfStream)
             {
-                string linie = cititor.ReadLine();
+                string? linie = cititor.ReadLine();
 
-                if (linie.StartsWith(_simbolAtribut))
+                if (linie != null && linie.StartsWith(SimbolAtribut))
                 {
                     _listaAtribute.Add(linie);
                 }
@@ -53,14 +51,16 @@ public class FisierGlobal
     {
         using (var scriitor = new StreamWriter(_numeFisier, true))
         {
-            foreach (string atribut in _listaAtribute)
+            foreach (string? atribut in _listaAtribute)
             {
                 scriitor.WriteLine(atribut);
+                scriitor.Flush();
             }
 
-            foreach (string document in _documenteNormalizate)
+            foreach (string? document in _documenteNormalizate)
             {
                 scriitor.WriteLine(document);
+                scriitor.Flush();
             }
         }
     }
@@ -70,7 +70,7 @@ public class FisierGlobal
         string numeDocumentNormalizat = $"{numeDocument}#";
         foreach (var document in _documenteNormalizate)
         {
-            if (document.Contains(numeDocumentNormalizat))
+            if (document != null && document.Contains(numeDocumentNormalizat))
             {
                 return true;
             }
@@ -78,7 +78,7 @@ public class FisierGlobal
 
         return false;
     }
-    private void AdaugaDocumentInLista(string document)
+    private void AdaugaDocumentInLista(string? document)
     {
         if (!_documenteNormalizate.Contains(document))
         {
@@ -86,7 +86,7 @@ public class FisierGlobal
         }
     }   
 
-    private void AdaugaAtributInLista(string atribut)
+    public void AdaugaAtributInLista(string? atribut)
     {
         if (!_listaAtribute.Contains(atribut))
         {
@@ -94,7 +94,7 @@ public class FisierGlobal
         }
     }
     
-    public bool EsteAtributulInLista(string atribut)
+    public bool EsteAtributulInLista(string? atribut)
     {
         if (_listaAtribute.Contains(atribut))
         {

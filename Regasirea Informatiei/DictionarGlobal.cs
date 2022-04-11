@@ -3,7 +3,7 @@ namespace Regasirea_Informatiei;
 public class DictionarGlobal
 {
     private readonly string _numeFisier = "Dictionar.txt";
-    private SortedSet<string> _dictionarCuvinte = new SortedSet<string>();
+    private SortedSet<string?> _dictionarCuvinte = new SortedSet<string?>();
 
     public DictionarGlobal()
     {
@@ -27,8 +27,8 @@ public class DictionarGlobal
     {
         using (StreamReader cititorCuvinte = new StreamReader(_numeFisier))
         {
-            string[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ');
-            foreach (string cuvant in cuvinte)
+            string?[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ');
+            foreach (string? cuvant in cuvinte)
             {
                 _dictionarCuvinte.Add(cuvant);
             }
@@ -42,11 +42,12 @@ public class DictionarGlobal
             foreach (var cuvant in _dictionarCuvinte)
             {
                 scriitorCuvinte.Write($"{cuvant} ");
+                scriitorCuvinte.Flush();
             }
         }
     }
 
-    public void AdaugaCuvantInLista(string cuvant)
+    public void AdaugaCuvantInLista(string? cuvant)
     {
         if (!_dictionarCuvinte.Contains(cuvant))
         {
