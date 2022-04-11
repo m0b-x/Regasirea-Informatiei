@@ -3,21 +3,18 @@ namespace Regasirea_Informatiei;
 public class DictionarGlobal
 {
     private readonly string _numeFisier = "Dictionar.txt";
-    private SortedSet<string?> _dictionarCuvinte = new SortedSet<string?>();
+    private SortedSet<string> _dictionarCuvinte = new SortedSet<string>();
 
     public DictionarGlobal()
     {
-        using (var scriitor = new StreamWriter(_numeFisier, true))
+        bool fisierulExista = File.Exists(_numeFisier);
+        if (fisierulExista)
         {
-            bool fisierulExista = File.Exists(_numeFisier);
-            if (fisierulExista)
-            {
-                CitesteCuvinte();
-            }
-            else
-            {
-                File.Create(_numeFisier);
-            }
+            CitesteCuvinte();
+        }
+        else
+        {
+            File.Create(_numeFisier);
         }
 
         Console.WriteLine("Dictionar initializat.");
@@ -27,8 +24,8 @@ public class DictionarGlobal
     {
         using (StreamReader cititorCuvinte = new StreamReader(_numeFisier))
         {
-            string?[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ');
-            foreach (string? cuvant in cuvinte)
+            string[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ');
+            foreach (string cuvant in cuvinte)
             {
                 _dictionarCuvinte.Add(cuvant);
             }
@@ -47,7 +44,7 @@ public class DictionarGlobal
         }
     }
 
-    public void AdaugaCuvantInLista(string? cuvant)
+    public void AdaugaCuvantInLista(string cuvant)
     {
         if (!_dictionarCuvinte.Contains(cuvant))
         {

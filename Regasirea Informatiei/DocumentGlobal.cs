@@ -3,8 +3,8 @@ namespace Regasirea_Informatiei;
 public class DocumentGlobal
 {
     private readonly string _numeFisier = "FisierGlobal.txt";
-    private List<string?> _documenteNormalizate = new List<string?>();
-    private SortedSet<string?> _listaAtribute = new SortedSet<string?>();
+    private List<string> _documenteNormalizate = new List<string>();
+    private SortedSet<string> _listaAtribute = new SortedSet<string>();
     
     public static string SimbolAtribut = "@";
     
@@ -31,15 +31,18 @@ public class DocumentGlobal
         {
             while (!cititor.EndOfStream)
             {
-                string? linie = cititor.ReadLine();
+                string linie = cititor.ReadLine();
 
-                if (linie != null && linie.StartsWith(SimbolAtribut))
+                if (linie != null)
                 {
-                    _listaAtribute.Add(linie);
-                }
-                else
-                {
-                    _documenteNormalizate.Add(linie);
+                    if (linie.StartsWith(SimbolAtribut))
+                    {
+                        _listaAtribute.Add(linie);
+                    }
+                    else
+                    {
+                        _documenteNormalizate.Add(linie);
+                    }
                 }
             }
 
@@ -51,13 +54,13 @@ public class DocumentGlobal
     {
         using (var scriitor = new StreamWriter(_numeFisier, true))
         {
-            foreach (string? atribut in _listaAtribute)
+            foreach (string atribut in _listaAtribute)
             {
                 scriitor.WriteLine(atribut);
                 scriitor.Flush();
             }
 
-            foreach (string? document in _documenteNormalizate)
+            foreach (string document in _documenteNormalizate)
             {
                 scriitor.WriteLine(document);
                 scriitor.Flush();
@@ -70,7 +73,7 @@ public class DocumentGlobal
         string numeDocumentNormalizat = $"{numeDocument}#";
         foreach (var document in _documenteNormalizate)
         {
-            if (document != null && document.Contains(numeDocumentNormalizat))
+            if (document.Contains(numeDocumentNormalizat))
             {
                 return true;
             }
@@ -78,7 +81,7 @@ public class DocumentGlobal
 
         return false;
     }
-    private void AdaugaDocumentInLista(string? document)
+    private void AdaugaDocumentInLista(string document)
     {
         if (!_documenteNormalizate.Contains(document))
         {
@@ -86,7 +89,7 @@ public class DocumentGlobal
         }
     }   
 
-    public void AdaugaAtributInLista(string? atribut)
+    public void AdaugaAtributInLista(string atribut)
     {
         if (!_listaAtribute.Contains(atribut))
         {
@@ -94,7 +97,7 @@ public class DocumentGlobal
         }
     }
     
-    public bool EsteAtributulInLista(string? atribut)
+    public bool EsteAtributulInLista(string atribut)
     {
         if (_listaAtribute.Contains(atribut))
         {

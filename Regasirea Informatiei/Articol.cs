@@ -13,9 +13,9 @@ public class Articol : IDisposable
     private static DocumentGlobal DocumentScriereGlobal = new DocumentGlobal();
     private static StopWords FisierStopWords = new StopWords();
     
-    private string _numeFisier;
+    private readonly string _numeFisier;
     private readonly XmlTextReader _cititorXml;
-    private Dictionary<string?, int> _dictionarCuvinte = new Dictionary<string?, int>();
+    private Dictionary<string, int> _dictionarCuvinte = new Dictionary<string, int>();
 
     public Articol(String numeFisier)
     {
@@ -40,12 +40,12 @@ public class Articol : IDisposable
                 UtilitatiCuvinte.InlocuiesteApostrof(continutFisier);
 
                 var punctuatii = continutFisier.Where(Char.IsPunctuation).Distinct().ToArray();
-                IEnumerable<string?> cuvinte = continutFisier.Split().Select(punctuatie => punctuatie.Trim(punctuatii));
+                IEnumerable<string> cuvinte = continutFisier.Split().Select(punctuatie => punctuatie.Trim(punctuatii));
 
                 cuvinte = cuvinte.Select(cuvant => cuvant.ToLowerInvariant()).ToArray()
                     .Where(cuvant => !string.IsNullOrEmpty(cuvant)).Except(FisierStopWords.ListaStopWords);
 
-                foreach (string? cuvant in cuvinte)
+                foreach (string cuvant in cuvinte)
                 {
                     if (UtilitatiCuvinte.EsteCuvantValid(cuvant))
                     {
@@ -62,12 +62,11 @@ public class Articol : IDisposable
         
     }
 
-    public void AdaugaCuvantInDictionar(string? cuvant, Dictionary<string?, int> dictionar)
+    public void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
     {
         if (_dictionarCuvinte.ContainsKey(cuvant))
         {
-
-            _dictionarCuvinte[cuvant] = dictionar[cuvant] + 1;
+                _dictionarCuvinte[cuvant] = dictionar[cuvant] + 1;
         }
         else
         {

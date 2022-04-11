@@ -2,7 +2,7 @@ namespace Regasirea_Informatiei;
 
 public static class UtilitatiCuvinte
 {
-    public static bool EsteCuvantValid(string? cuvant)
+    public static bool EsteCuvantValid(string cuvant)
     {
         if (!AreCaractereSpeciale(cuvant))
         {
@@ -14,9 +14,9 @@ public static class UtilitatiCuvinte
         }
     }
 
-    public static bool EsteAbreviere(string? cuvant)
+    public static bool EsteAbreviere(string cuvant)
     {
-        if (cuvant.All<char>(Char.IsUpper))
+        if (cuvant.All(Char.IsUpper))
         {
             return true;
         }
@@ -33,7 +33,7 @@ public static class UtilitatiCuvinte
         _ = paragraf.Replace("' ", " ");
     }
 
-    public static bool AreCaractereSpeciale(string? cuvant)
+    public static bool AreCaractereSpeciale(string cuvant)
     {
         return cuvant.Any(caracter => !Char.IsLetterOrDigit(caracter));
     }
