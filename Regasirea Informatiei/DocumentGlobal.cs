@@ -41,7 +41,10 @@ public class DocumentGlobal
                     }
                     else
                     {
-                        _documenteNormalizate.Add(linie);
+                        if (!String.IsNullOrWhiteSpace(linie))
+                        {
+                            _documenteNormalizate.Add(linie);
+                        }
                     }
                 }
             }
@@ -52,12 +55,12 @@ public class DocumentGlobal
 
     public void ScrieDate()
     {
-        using (var scriitor = new StreamWriter(_numeFisier))
+        using (var scriitor = new StreamWriter(_numeFisier,false))
         {
+            scriitor.AutoFlush = true;
             foreach (string atribut in _listaAtribute)
             {
-                scriitor.WriteLine(atribut);
-                scriitor.Flush();
+                scriitor.WriteLine($"{atribut}");
             }
             
             scriitor.WriteLine($"\n@data\n");
@@ -65,7 +68,6 @@ public class DocumentGlobal
             foreach (string document in _documenteNormalizate)
             {
                 scriitor.WriteLine(document);
-                scriitor.Flush();
             }
             
         }

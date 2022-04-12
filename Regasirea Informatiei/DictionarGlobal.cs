@@ -28,7 +28,7 @@ public class DictionarGlobal
     {
         using (StreamReader cititorCuvinte = new StreamReader(_numeFisier))
         {
-            string[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ');
+            string[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ', StringSplitOptions.RemoveEmptyEntries);
             foreach (string cuvant in cuvinte)
             {
                 _dictionarCuvinte.Add(cuvant);
@@ -39,12 +39,12 @@ public class DictionarGlobal
 
     public void ScrieCuvinteleInFisier()
     {
-        using (StreamWriter scriitorCuvinte = new StreamWriter(_numeFisier))
+        using (StreamWriter scriitorCuvinte = new StreamWriter(_numeFisier,false))
         {
+            scriitorCuvinte.AutoFlush = true;
             foreach (var cuvant in _dictionarCuvinte)
             {
                 scriitorCuvinte.Write($"{cuvant} ");
-                scriitorCuvinte.Flush();
             }
         }
     }
