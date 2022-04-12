@@ -37,7 +37,7 @@ public class DocumentGlobal
                 {
                     if (linie.StartsWith(SimbolAtribut))
                     {
-                        _listaAtribute.Add(linie);
+                        _listaAtribute.Add(linie.Split()[0]);
                     }
                     else
                     {
