@@ -10,9 +10,11 @@ public class Articol : IDisposable
         _cititorXml.Dispose();
     }
 
-    private static DictionarGlobal DictionarGlobal = new DictionarGlobal();
-    private static DocumentGlobal DocumentScriereGlobal = new DocumentGlobal();
-    private static StopWords FisierStopWords = new StopWords();
+    public static DictionarGlobal DictionarGlobal = new DictionarGlobal();
+    public static DocumentGlobal DocumentScriereGlobal = new DocumentGlobal();
+    public static StopWords FisierStopWords = new StopWords();
+
+    private SnowballStemmer stemmerCuvinte = new();
     
     private readonly string _numeFisier;
     private string _titlu;
@@ -20,6 +22,11 @@ public class Articol : IDisposable
     private readonly XmlTextReader _cititorXml;
     private Dictionary<string, int> _dictionarCuvinte = new Dictionary<string, int>();
 
+
+    public Dictionary<string, int> DictionarCuvinte
+    {
+        get { return _dictionarCuvinte; }
+    }
     public Articol(String numeFisier)
     {
         try
@@ -65,9 +72,12 @@ public class Articol : IDisposable
                                      UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
                                      !UtilitatiCuvinte.EsteAbreviere(cuvant)).
                     Except(FisierStopWords.ListaStopWords).Distinct();
-                    
+
+                cuvinte = ReturneazaRadacinileCuvintelor(cuvinte);
+                
                 DocumentScriereGlobal.AdaugaAtributeInLista(cuvinte);
                 DictionarGlobal.AdaugaCuvinteInLista(cuvinte);
+                
                 foreach (string cuvant in cuvinte)
                 {
                     AdaugaCuvantInDictionar(cuvant, _dictionarCuvinte);
@@ -77,13 +87,26 @@ public class Articol : IDisposable
         
     }
 
+    public IEnumerable<string> ReturneazaRadacinileCuvintelor(IEnumerable<string> cuvinte)
+    {
+        List<string> cuvinteStemate = new List<string>();
+        
+        foreach (var cuvant in cuvinte)
+        {
+            if(!cuvinteStemate.Contains(cuvant))
+                cuvinteStemate.Add(stemmerCuvinte.Stem(cuvant));
+        }
+
+        return cuvinteStemate.AsEnumerable();
+    }
+
     public void RealizeazaFormaNormalizata()
     {
         _documentNormalizat = new StringBuilder();
         _documentNormalizat.Append($"{_titlu}# ");
         foreach (var cuvant in _dictionarCuvinte)
         {
-            _documentNormalizat.Append($"{DictionarGlobal.DictionarCuvinte.IndexOf(cuvant.Key)} : {cuvant.Value} ");
+            _documentNormalizat.Append($"{DictionarGlobal.DictionarCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
         }
 
         DocumentScriereGlobal.AdaugaDocumentInLista(_titlu, _documentNormalizat.ToString());
