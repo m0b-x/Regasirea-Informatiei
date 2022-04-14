@@ -12,9 +12,9 @@ public class Articol : IDisposable
 
     public static DictionarGlobal DictionarGlobal = new DictionarGlobal();
     public static DocumentGlobal DocumentScriereGlobal = new DocumentGlobal();
-    public static StopWords FisierStopWords = new StopWords();
-
-    private SnowballStemmer stemmerCuvinte = new();
+    
+    private static DictionarStopWords _fisierDictionarStopWords = new DictionarStopWords();
+    private static SnowballStemmer _stemmerCuvinte = new();
     
     private readonly string _numeFisier;
     private string _titlu;
@@ -23,6 +23,10 @@ public class Articol : IDisposable
     private Dictionary<string, int> _dictionarCuvinte = new Dictionary<string, int>();
 
 
+    public String Titlu
+    {
+        get { return _titlu; }
+    }
     public Dictionary<string, int> DictionarCuvinte
     {
         get { return _dictionarCuvinte; }
@@ -71,7 +75,7 @@ public class Articol : IDisposable
                     .Where(cuvant => !string.IsNullOrEmpty(cuvant) &&
                                      UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
                                      !UtilitatiCuvinte.EsteAbreviere(cuvant)).
-                    Except(FisierStopWords.ListaStopWords).Distinct();
+                    Except(_fisierDictionarStopWords.ListaStopWords).Distinct();
 
                 cuvinte = ReturneazaRadacinileCuvintelor(cuvinte);
                 
@@ -94,7 +98,7 @@ public class Articol : IDisposable
         foreach (var cuvant in cuvinte)
         {
             if(!cuvinteStemate.Contains(cuvant))
-                cuvinteStemate.Add(stemmerCuvinte.Stem(cuvant));
+                cuvinteStemate.Add(_stemmerCuvinte.Stem(cuvant));
         }
 
         return cuvinteStemate.AsEnumerable();
@@ -106,7 +110,7 @@ public class Articol : IDisposable
         _documentNormalizat.Append($"{_titlu}# ");
         foreach (var cuvant in _dictionarCuvinte)
         {
-            _documentNormalizat.Append($"{DictionarGlobal.DictionarCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
+            _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
         }
 
         DocumentScriereGlobal.AdaugaDocumentInLista(_titlu, _documentNormalizat.ToString());

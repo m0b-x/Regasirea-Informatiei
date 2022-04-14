@@ -1,13 +1,18 @@
+using System.Collections.Generic;
 namespace Regasirea_Informatiei;
 
 public class DictionarGlobal
 {
     private readonly string _numeFisier = "Dictionar.txt";
-    private List<string> _dictionarCuvinte = new List<string>();
+    private List<string> _listaCuvinte = new List<string>(30000);
 
-    public List<string> DictionarCuvinte
+    public string NumeFisier
     {
-        get{return _dictionarCuvinte;}
+        get { return _numeFisier; }
+    }
+    public List<string> ListaCuvinte
+    {
+        get{return _listaCuvinte;}
     }
     public DictionarGlobal()
     {
@@ -31,10 +36,10 @@ public class DictionarGlobal
             string[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ', StringSplitOptions.RemoveEmptyEntries);
             foreach (string cuvant in cuvinte)
             {
-                _dictionarCuvinte.Add(cuvant);
+                _listaCuvinte.Add(cuvant);
             }
         } 
-        _dictionarCuvinte.Sort();
+        _listaCuvinte.Sort();
     }
 
     public void ScrieCuvinteleInFisier()
@@ -42,7 +47,7 @@ public class DictionarGlobal
         using (StreamWriter scriitorCuvinte = new StreamWriter(_numeFisier,false))
         {
             scriitorCuvinte.AutoFlush = true;
-            foreach (var cuvant in _dictionarCuvinte)
+            foreach (var cuvant in _listaCuvinte)
             {
                 scriitorCuvinte.Write($"{cuvant} ");
             }
@@ -53,12 +58,12 @@ public class DictionarGlobal
     {
         foreach(string cuvant in cuvinte)
         {
-            if (!_dictionarCuvinte.Contains(cuvant))
+            if (!_listaCuvinte.Contains(cuvant))
             {
-                _dictionarCuvinte.Add(cuvant);
+                _listaCuvinte.Add(cuvant);
             }
         }
-        _dictionarCuvinte.Sort();
+        _listaCuvinte.Sort();
         ScrieCuvinteleInFisier();
     }
 }
