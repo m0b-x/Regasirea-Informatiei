@@ -49,7 +49,7 @@ public class DocumentGlobal
                 {
                     if (linie.StartsWith(_simbolAtribut))
                     {
-                        _listaAtribute.Add(linie.Split()[0]);
+                        AdaugaAtributInLista(linie.Split()[0].Trim());
                     }
                     else
                     {
@@ -71,6 +71,7 @@ public class DocumentGlobal
             foreach (string atribut in _listaAtribute)
             {
                 scriitor.WriteLine($"{atribut}");
+                Console.WriteLine($"#{atribut}#");
             }
             
             scriitor.WriteLine($"\n@data\n");
@@ -156,10 +157,7 @@ public class DocumentGlobal
     {
         foreach (var atribut in atribute)
         {
-            if (!_listaAtribute.Contains(atribut))
-            {
-                _listaAtribute.Add($"@{atribut} ");
-            }
+            AdaugaAtributInLista($"@{atribut}");
         }
     }
     

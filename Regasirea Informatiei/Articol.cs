@@ -9,7 +9,8 @@ public class Articol : IDisposable
     {
         _cititorXml.Dispose();
     }
-    
+
+    public static string NumeFisierDocumente = "Documente";
     public static DictionarGlobal DictionarGlobal = new DictionarGlobal();
     public static DocumentGlobal DocumentScriereGlobal = new DocumentGlobal();
     
@@ -36,7 +37,7 @@ public class Articol : IDisposable
         try
         {
             _numeFisier = numeFisier;
-            _cititorXml = new XmlTextReader(@_numeFisier);
+            _cititorXml = new XmlTextReader($@"{NumeFisierDocumente}/{_numeFisier}");
             CitesteTitlu();
             CitesteCuvinte();
             RealizeazaFormaVectoriala();

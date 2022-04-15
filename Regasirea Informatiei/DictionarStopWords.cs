@@ -22,8 +22,6 @@ public class DictionarStopWords
         {
             File.Create(_numeFisier);
         }
-
-        Console.WriteLine("Fisier StopWords initializat.");
     }
 
     public void CitesteDate()

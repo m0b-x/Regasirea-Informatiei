@@ -25,8 +25,6 @@ public class DictionarGlobal
         {
             File.Create(_numeFisier);
         }
-
-        Console.WriteLine("Dictionar initializat.");
     }
 
     private void CitesteCuvinte()
