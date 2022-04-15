@@ -9,7 +9,7 @@ public class Articol : IDisposable
     {
         _cititorXml.Dispose();
     }
-
+    
     public static DictionarGlobal DictionarGlobal = new DictionarGlobal();
     public static DocumentGlobal DocumentScriereGlobal = new DocumentGlobal();
     
@@ -39,7 +39,7 @@ public class Articol : IDisposable
             _cititorXml = new XmlTextReader(@_numeFisier);
             CitesteTitlu();
             CitesteCuvinte();
-            RealizeazaFormaNormalizata();
+            RealizeazaFormaVectoriala();
         }
         catch (Exception exceptie)
         {
@@ -66,7 +66,6 @@ public class Articol : IDisposable
             if (_cititorXml.NodeType == XmlNodeType.Element && _cititorXml.Name == "p")
             {
                 String continutFisier = (_cititorXml.ReadElementString());
-                UtilitatiCuvinte.InlocuiesteApostrof(continutFisier);
 
                 var punctuatii = continutFisier.Where(Char.IsPunctuation).Distinct().ToArray();
                 IEnumerable<string> cuvinte = continutFisier.Split().Select(punctuatie => punctuatie.Trim(punctuatii));
@@ -104,7 +103,7 @@ public class Articol : IDisposable
         return cuvinteStemate.AsEnumerable();
     }
 
-    public void RealizeazaFormaNormalizata()
+    public void RealizeazaFormaVectoriala()
     {
         _documentNormalizat = new StringBuilder();
         _documentNormalizat.Append($"{_titlu}# ");
@@ -133,6 +132,19 @@ public class Articol : IDisposable
         DictionarGlobal.ScrieCuvinteleInFisier();
         DocumentScriereGlobal.ScrieDate();
     }
-    
+    public int ExtrageFrecventaMaxima()
+    {
+        int max = 0;
+        foreach (var cuvant in _dictionarCuvinte)
+        {
+            if (cuvant.Value > max)
+            {
+                max = cuvant.Value;
+            }
+        }
+
+        return max;
+
+    }
 
 }
