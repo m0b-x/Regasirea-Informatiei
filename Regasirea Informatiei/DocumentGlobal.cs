@@ -56,7 +56,6 @@ public class DocumentGlobal
                         _documenteCaSiStringuri.Add(linie);
                         KeyValuePair<string, Dictionary<int, int>> pereche = ConvertesteDocumentInDictionar(linie);
                         _documenteCaSiDictionare.Add(pereche.Key,pereche.Value);
-                        Console.Write(pereche.Value.ToString());
                     }
                 }
             }
@@ -71,7 +70,6 @@ public class DocumentGlobal
             foreach (string atribut in _listaAtribute)
             {
                 scriitor.WriteLine($"{atribut}");
-                Console.WriteLine($"#{atribut}#");
             }
             
             scriitor.WriteLine($"\n@data\n");

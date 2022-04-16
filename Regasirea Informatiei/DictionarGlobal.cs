@@ -1,10 +1,13 @@
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+
 namespace Regasirea_Informatiei;
 
 public class DictionarGlobal
 {
     private readonly string _numeFisier = "Dictionar.txt";
     private List<string> _listaCuvinte = new List<string>(30000);
+    private int _marimeDictionar;
 
     public string NumeFisier
     {
@@ -14,8 +17,15 @@ public class DictionarGlobal
     {
         get{return _listaCuvinte;}
     }
+
+    public int MarimeDictionar
+    {
+        get { return _marimeDictionar; }
+    }
+    
     public DictionarGlobal()
     {
+        _marimeDictionar = 0;
         bool fisierulExista = File.Exists(_numeFisier);
         if (fisierulExista)
         {
@@ -32,9 +42,10 @@ public class DictionarGlobal
         using (StreamReader cititorCuvinte = new StreamReader(_numeFisier))
         {
             string[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            
             foreach (string cuvant in cuvinte)
             {
-                _listaCuvinte.Add(cuvant);
+                AdaugaCuvantInLista(cuvant);
             }
         } 
         _listaCuvinte.Sort();
@@ -52,16 +63,23 @@ public class DictionarGlobal
         }
     }
 
+    
     public void AdaugaCuvinteInLista(IEnumerable<string> cuvinte)
     {
         foreach(string cuvant in cuvinte)
         {
-            if (!_listaCuvinte.Contains(cuvant))
-            {
-                _listaCuvinte.Add(cuvant);
-            }
+            AdaugaCuvantInLista(cuvant);
         }
         _listaCuvinte.Sort();
         ScrieCuvinteleInFisier();
+    }
+
+    private void AdaugaCuvantInLista(string cuvant)
+    {
+        if (!_listaCuvinte.Contains(cuvant))
+        {
+            _listaCuvinte.Add(cuvant);
+            _marimeDictionar++;
+        }
     }
 }

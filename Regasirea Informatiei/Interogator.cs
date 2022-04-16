@@ -1,18 +1,13 @@
-using System.Collections;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Text.RegularExpressions;
-
 namespace Regasirea_Informatiei;
 
 public class Interogator
 {
     private string _stringInterogare;
     private Interogare _interogare;
-    private DocumentGlobal _documentGlobal;
+    private static DocumentGlobal _documentGlobal;
     private Dictionary<string, Dictionary<int, double>> _dictionarDocumenteNormalizate = new();
-    private Dictionary<int, double> _dictionarNormalizatInterogare = new();
-    private SortedList<double, string> _articoleSortateDupaSimilaritate = new();
+    private Dictionary<int, double> _dictionarInterogareNormalizat = new();
+    private List<KeyValuePair<double, string>> similaritateArticole = new();
 
     public string StringInterogare
     {
@@ -35,146 +30,162 @@ public class Interogator
         }
         else
         {
-            _interogare = new Interogare(_stringInterogare);
-            List<double> vectorInterogare = _dictionarNormalizatInterogare.Values.ToList();
-            RealizeazaVectorulNormalizatAlInterogarii(_interogare);
             foreach (var articol in articole)
             {
                 RealizeazaVectorulNormalizatDeAtribute(articol);
             }
 
+            _interogare = new Interogare(_stringInterogare);
+            RealizeazaVectorulNormalizatAlInterogarii(_interogare);
+            
             foreach (var document in _dictionarDocumenteNormalizate)
             {
-                List<double> vectorDocument = new();
-                foreach (var valoareVector in document.Value)
-                {
-                    vectorDocument.Add(valoareVector.Value);
-                }
-
-                _articoleSortateDupaSimilaritate.Add(CalculeazaSimilaritatea(vectorInterogare, vectorDocument),
-                    document.Key);
+                double similaritate = CalculeazaSimilaritate(_dictionarInterogareNormalizat.Values.ToList(), 
+                                                              document.Value.Values.ToList());
+                 similaritateArticole.Add(new KeyValuePair<double, string>(similaritate, document.Key));
             }
         }
-
+        
+        similaritateArticole.Sort((x, y) => y.Key.CompareTo(x.Key));
+        
         Console.WriteLine("Articole Rezultate");
-        foreach (var articoleSortate in _articoleSortateDupaSimilaritate)
+        foreach (var articoleSortate in similaritateArticole)
         {
-            Console.WriteLine($"{articoleSortate.Value}");
+            Console.WriteLine($"{articoleSortate.Value} - {articoleSortate.Key}");
         }
     }
 
-    public static double CalculeazaSimilaritatea(List<double> vectorA, List<double> vectorB)
-    {
-        int numarulMaiMareDeElemente = 0;
-        numarulMaiMareDeElemente = ((vectorB.Count < vectorA.Count) ? vectorB.Count : vectorA.Count);
-        double sumaVectoriala = 0.0d;
-        double putereaPrimuluiVector = 0.0d;
-        double putereaAlDoileaVector = 0.0d;
-        for (int n = 0; n < numarulMaiMareDeElemente; n++)
-        {
-            sumaVectoriala += vectorA[n] * vectorB[n];
-            putereaPrimuluiVector += Math.Pow(vectorA[n], 2);
-            putereaAlDoileaVector += Math.Pow(vectorB[n], 2);
-        }
-
-        return sumaVectoriala / (Math.Sqrt(putereaPrimuluiVector) * Math.Sqrt(putereaAlDoileaVector));
+    
+    public static double CalculeazaSimilaritate(List<double> vectorA, List<double> vectorB) {
+        double produsElemente = 0.0;
+        double putereVectorA = 0.0;
+        double putereVectorB = 0.0;
+        for (int index = 0; index < vectorA.Count; index++) {
+            produsElemente += vectorA[index] * vectorB[index];
+            putereVectorA += Math.Pow(vectorA[index], 2);
+            putereVectorB += Math.Pow(vectorB[index], 2);
+        }   
+        return produsElemente / (Math.Sqrt(putereVectorA) * Math.Sqrt(putereVectorB));
     }
 
     public void RealizeazaVectorulNormalizatAlInterogarii(Interogare interogare)
     {
-        Dictionary<int, double> frecventeNormalizate = new();
-        foreach (var aparitieCuvant in interogare.DictionarNormalizat)
+        Dictionary<int, double> frecventeNormalizate = new(30000);
+        foreach (var cuvant in Articol.DictionarGlobal.ListaCuvinte)
         {
-            double frecventaCuvantuluiNormalizata =
-                ReturneazaFrecventaCuvantuluiInInterogare(Articol.DictionarGlobal.ListaCuvinte[aparitieCuvant.Key],
-                    interogare);
-            frecventeNormalizate.Add(aparitieCuvant.Key, frecventaCuvantuluiNormalizata);
-        }
-
-        _dictionarNormalizatInterogare = frecventeNormalizate;
-    }
-
-    public void RealizeazaVectorulNormalizatDeAtribute(Articol articol)
-    {
-        foreach (var documentCaSiDictionar in _documentGlobal.DocumenteCaSiDictionare)
-        {
-            Dictionary<int, double> frecventeNormalizate = new();
-            foreach (var aparitieCuvant in documentCaSiDictionar.Value)
+            int indexCuvant = Articol.DictionarGlobal.ListaCuvinte.IndexOf(cuvant);
+            
+            if (interogare.DictionarCuvinte.Keys.Contains(cuvant))
             {
                 double frecventaCuvantuluiNormalizata =
-                    ReturneazaFrecventaCuvantuluiInArticol(Articol.DictionarGlobal.ListaCuvinte[aparitieCuvant.Key],
-                        articol);
-                frecventeNormalizate.Add(aparitieCuvant.Key, frecventaCuvantuluiNormalizata);
+                    CalculeazaFrecventaCuvantuluiInInterogare(Articol.DictionarGlobal.ListaCuvinte[indexCuvant],
+                        interogare);
+                frecventeNormalizate.Add(indexCuvant, frecventaCuvantuluiNormalizata);
             }
-
-            _dictionarDocumenteNormalizate.Add(documentCaSiDictionar.Key, frecventeNormalizate);
+            else
+            {
+                frecventeNormalizate.Add(indexCuvant, 0);
+            }
         }
+
+        _dictionarInterogareNormalizat = frecventeNormalizate;
+    }
+    public void RealizeazaVectorulNormalizatDeAtribute(Articol articol)
+    {
+        Dictionary<int, double> frecventeNormalizate = new(30000);
+        foreach (var cuvant in Articol.DictionarGlobal.ListaCuvinte)
+        {
+            int indexCuvant = Articol.DictionarGlobal.ListaCuvinte.IndexOf(cuvant);
+            if (articol.DictionarCuvinte.Keys.Contains(cuvant))
+            {
+                //aici e problema, frecventaCuvantuluiNormalizata este mereu 0
+                double frecventaCuvantuluiNormalizata =
+                    CalculeazaFrecventaCuvantuluiInArticol(Articol.DictionarGlobal.ListaCuvinte[indexCuvant],
+                        articol);
+                frecventeNormalizate.Add(indexCuvant, frecventaCuvantuluiNormalizata);
+            }
+            else
+            {
+                frecventeNormalizate.Add(indexCuvant, 0);
+            }
+        }
+        _dictionarDocumenteNormalizate.Add(articol.Titlu, frecventeNormalizate);
     }
 
     private double CalculeazaIDF(string atribut)
     {
         int nrTotalDocumente = Articol.DocumentScriereGlobal.DocumenteCaSiStringuri.Count;
         int nrDocumenteContinandAtributul = ReturneazaNrDocumenteCuAtributul(atribut);
-        return Math.Log(nrTotalDocumente / nrDocumenteContinandAtributul);
+        if (nrDocumenteContinandAtributul != 0)
+        {
+            return Math.Log((double)nrTotalDocumente / nrDocumenteContinandAtributul);
+        }
+        else
+        {
+            return 0;
+        }
+
     }
 
     private double CalculeazaNormalizareaNominala(Articol articol, string atribut)
     {
         int indexulAtributului = Articol.DictionarGlobal.ListaCuvinte.IndexOf(atribut);
-        int numarAparitii = 0;
+        int aparitiiArticol = 0;
         if (indexulAtributului != -1)
         {
-            numarAparitii = articol.DictionarCuvinte[atribut];
+            if (articol.DictionarCuvinte.ContainsKey(atribut))
+            {
+                aparitiiArticol = articol.DictionarCuvinte[atribut];
+            }
+            else
+            {
+                aparitiiArticol = 0;
+            }
         }
 
-        return numarAparitii / articol.ExtrageFrecventaMaxima();
+        //problema din cv motiv impartirea returneaza 0
+        return (double)aparitiiArticol / articol.ExtrageFrecventaMaxima();
     }
 
     private double CalculeazaNormalizareaNominala(Interogare interogare, string atribut)
     {
         int indexulAtributului = Articol.DictionarGlobal.ListaCuvinte.IndexOf(atribut);
-        int numarAparitii = 0;
+        int aparitiiArticol = 0;
         if (indexulAtributului != -1)
         {
-            numarAparitii = interogare.DictionarCuvinte[atribut];
-        }
-
-        return numarAparitii / interogare.ExtrageFrecventaMaxima();
+            aparitiiArticol = interogare.DictionarCuvinte[atribut];
+        };
+        double valoareReturnata = (double) aparitiiArticol / interogare.ExtrageFrecventaMaxima();
+        return valoareReturnata;
     }
 
-    public double ReturneazaFrecventaCuvantuluiInArticol(string atribut, Articol articol)
+    public double CalculeazaFrecventaCuvantuluiInArticol(string atribut, Articol articol)
     {
-        return CalculeazaIDF(atribut) * CalculeazaNormalizareaNominala(articol, atribut);
+        double idf = CalculeazaIDF(atribut);
+        double similaritateNominala = CalculeazaNormalizareaNominala(articol, atribut);
+
+        return idf * similaritateNominala;
     }
 
-    public double ReturneazaFrecventaCuvantuluiInInterogare(string atribut, Interogare interogare)
+    public double CalculeazaFrecventaCuvantuluiInInterogare(string atribut, Interogare interogare)
     {
-        return CalculeazaIDF(atribut) * CalculeazaNormalizareaNominala(interogare, atribut);
+        double idf = CalculeazaIDF(atribut);
+        double similaritateNominala = CalculeazaNormalizareaNominala(interogare, atribut);
+
+        return idf * similaritateNominala;
     }
-
-    public bool ContineDocumentulAtributul(string document, string atribut)
-    {
-        int numaratorDocumente = 0;
-
-        if (document.Split('#')[1].Contains(atribut))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
+    
     public int ReturneazaNrDocumenteCuAtributul(string atribut)
     {
-        int numaratorDocumente = 1;
-        foreach (var document in _documentGlobal.DocumenteCaSiStringuri)
-        {
-            if (document.Contains(atribut))
+        int indexCuvant = Articol.DictionarGlobal.ListaCuvinte.IndexOf(atribut);
+        int numaratorDocumente = 0;
+        foreach (var document in _documentGlobal.DocumenteCaSiDictionare.Values)
+        { 
+            if (document.Keys.Contains(indexCuvant))
             {
                 numaratorDocumente++;
             }
         }
-
         return numaratorDocumente;
     }
 }

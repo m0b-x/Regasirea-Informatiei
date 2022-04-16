@@ -12,5 +12,5 @@ articole.Add(articol);
 articole.Add(articol1);
 articole.Add(articol2);
 
-//Interogator interogator = new Interogator(ref Articol.DocumentScriereGlobal);
-//interogator.InterogheazaArticole(articole);
+Interogator interogator = new Interogator(ref Articol.DocumentScriereGlobal);
+interogator.InterogheazaArticole(articole);

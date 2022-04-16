@@ -1,5 +1,4 @@
 using System.Text;
-using System.Xml;
 
 namespace Regasirea_Informatiei;
 
@@ -108,7 +107,7 @@ public class Interogare
     
     public int ExtrageFrecventaMaxima()
     {
-        int max = 0;
+        int max = -1;
         foreach (var cuvant in _dictionarCuvinte)
         {
             if (cuvant.Value > max)

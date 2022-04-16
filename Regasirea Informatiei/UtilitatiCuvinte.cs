@@ -26,11 +26,11 @@ public static class UtilitatiCuvinte
         }
     }
 
-    public static void InlocuiesteApostrof(string paragraf)
+    public static void InlocuiesteApostrofuri(string paragraf)
     {
-        _ = paragraf.Replace("'s", "");
-        _ = paragraf.Replace("'d", "");
-        _ = paragraf.Replace("' ", " ");
+        paragraf = paragraf.Replace("'s", "");
+        paragraf = paragraf.Replace("'d", "");
+        paragraf = paragraf.Replace("' ", " ");
     }
 
     public static bool AreCaractereSpeciale(string cuvant)
