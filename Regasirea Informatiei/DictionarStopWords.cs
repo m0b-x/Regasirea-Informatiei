@@ -16,7 +16,7 @@ public class DictionarStopWords
 
     public List<string> ListaStopWords { get; } = new(450);
 
-    public void CitesteDate()
+    private void CitesteDate()
     {
         using (var cititorCuvinte = new StreamReader(_numeFisier))
         {

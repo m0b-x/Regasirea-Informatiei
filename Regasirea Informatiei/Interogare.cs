@@ -1,9 +1,10 @@
 namespace Regasirea_Informatiei;
+using SF.Snowball.Ext;
 
 public class Interogare
 {
     private static readonly DictionarStopWords FisierDictionarStopWords = new();
-    private static readonly SnowballStemmer StemmerCuvinte = new();
+    private static readonly EnglishStemmer StemmerCuvinte = new();
 
     public Interogare(string interogare, DictionarGlobal dictionarGlobal)
     {
@@ -16,13 +17,13 @@ public class Interogare
     public string StringInterogare { get; }
 
 
-    public Dictionary<string, int> DictionarCuvinte { get; } = new();
+    public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
 
     public DictionarGlobal DictionarGlobal { get; }
 
-    public Dictionary<int, int> DictionarNormalizat { get; } = new();
+    public Dictionary<int, int> DictionarNormalizat { get; } = new(30000);
 
-    public void CitesteDate()
+    private void CitesteDate()
     {
         var continutiterogare = StringInterogare;
 
@@ -45,20 +46,20 @@ public class Interogare
     private IEnumerable<string> ReturneazaCuvinteleNormalizate(string continutFisier)
     {
         var cuvinte = continutFisier.Split().Select(cuvant =>
-                ReturneazaRadacinaCuvantului(
-                    cuvant.StergePunctuatia().ToLowerInvariant().Trim()))
-            .Where(cuvant => !string.IsNullOrEmpty(cuvant) &&
-                             UtilitatiCuvinte.EsteCuvantValid(cuvant))
+                ReturneazaRadacinaCuvantului(cuvant.StergePunctuatia().ToLowerInvariant().Trim()))
+            .Where(cuvant =>UtilitatiCuvinte.EsteCuvantValid(cuvant))
             .Except(FisierDictionarStopWords.ListaStopWords).Distinct();
         return cuvinte;
     }
 
-    public string ReturneazaRadacinaCuvantului(string cuvant)
+    private string ReturneazaRadacinaCuvantului(string cuvant)
     {
-        return StemmerCuvinte.Stem(cuvant);
+        StemmerCuvinte.SetCurrent(cuvant);
+        StemmerCuvinte.Stem();
+        return StemmerCuvinte.GetCurrent();
     }
 
-    public void AdaugaCuvantInDictionarNormalizat(int cuvantIndex, Dictionary<int, int> dictionar)
+    private void AdaugaCuvantInDictionarNormalizat(int cuvantIndex, Dictionary<int, int> dictionar)
     {
         if (DictionarNormalizat.ContainsKey(cuvantIndex))
             DictionarNormalizat[cuvantIndex] = dictionar[cuvantIndex] + 1;
@@ -66,7 +67,7 @@ public class Interogare
             DictionarNormalizat.Add(cuvantIndex, 1);
     }
 
-    public void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
+    private void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
     {
         if (DictionarCuvinte.ContainsKey(cuvant))
             DictionarCuvinte[cuvant] = dictionar[cuvant] + 1;

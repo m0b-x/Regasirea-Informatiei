@@ -13,10 +13,9 @@ public static class CalculatorEntropie
                 tabel[caracter]++;
             else
                 tabel.Add(caracter, 1);
-        double frecventa;
         foreach (var litera in tabel)
         {
-            frecventa = litera.Value / mesaj.Length;
+            var frecventa = litera.Value / mesaj.Length;
             entropia += frecventa * (Math.Log(frecventa) / Math.Log(2));
         }
 

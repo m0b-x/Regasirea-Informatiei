@@ -11,7 +11,6 @@ public class DictionarGlobal
         else
             File.Create(NumeFisier);
     }
-
     public string NumeFisier { get; } = "Dictionar.txt";
 
     public List<string> ListaCuvinte { get; } = new(30000);
@@ -22,12 +21,11 @@ public class DictionarGlobal
     {
         using (var cititorCuvinte = new StreamReader(NumeFisier))
         {
-            var cuvinte = cititorCuvinte.ReadToEnd().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var cuvinte = cititorCuvinte.ReadToEnd().
+                Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList().Distinct().Except(ListaCuvinte);
 
-            foreach (var cuvant in cuvinte) AdaugaCuvantInLista(cuvant);
+            foreach (var cuvant in cuvinte) ListaCuvinte.Add(cuvant);
         }
-
-        ListaCuvinte.Sort();
     }
 
     public void ScrieCuvinteleInFisier()
@@ -44,7 +42,6 @@ public class DictionarGlobal
     {
         foreach (var cuvant in cuvinte) AdaugaCuvantInLista(cuvant);
         ListaCuvinte.Sort();
-        ScrieCuvinteleInFisier();
     }
 
     private void AdaugaCuvantInLista(string cuvant)

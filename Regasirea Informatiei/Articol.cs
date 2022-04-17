@@ -1,29 +1,28 @@
 using System.Text;
 using System.Xml;
+using SF.Snowball.Ext;
 
 namespace Regasirea_Informatiei;
 
 public class Articol : IDisposable
 {
-    public static string NumeFisierDocumente = "Documente";
     public static DictionarGlobal DictionarGlobal = new();
-    public static DocumentGlobal DocumentScriereGlobal = new();
+    public static DocumentGlobal DocumentGlobal = new();
 
-    private static readonly DictionarStopWords _fisierDictionarStopWords = new();
-    private static readonly SnowballStemmer _stemmerCuvinte = new();
+    private readonly DictionarStopWords _fisierDictionarStopWords = new();
+    private readonly EnglishStemmer _stemmerCuvinte = new();
     private readonly XmlTextReader _cititorXml;
 
-    private readonly string _numeFisier;
-
-
+    private readonly string _pathFisier;
+    
     private StringBuilder _documentNormalizat = new(10000);
 
-    public Articol(string numeFisier)
+    public Articol(string pathFisier)
     {
-        _numeFisier = numeFisier;
+        _pathFisier = pathFisier;
         try
         {
-            _cititorXml = new XmlTextReader($@"{NumeFisierDocumente}/{_numeFisier}");
+            _cititorXml = new XmlTextReader($@"{_pathFisier}");
         }
         catch (Exception exceptie)
         {
@@ -42,7 +41,7 @@ public class Articol : IDisposable
         _cititorXml.Dispose();
     }
 
-    public void CitesteDate()
+    private void CitesteDate()
     {
         var continutFisier = new StringBuilder(50000);
         using (_cititorXml)
@@ -58,44 +57,44 @@ public class Articol : IDisposable
         RealizeazaFormaVectoriala();
     }
 
-    public void RealizeazaFormaVectoriala()
+    private void RealizeazaFormaVectoriala()
     {
         _documentNormalizat = new StringBuilder();
         _documentNormalizat.Append($"{Titlu}# ");
         foreach (var cuvant in DictionarCuvinte)
             _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
 
-        DocumentScriereGlobal.AdaugaDocumentInLista(Titlu, _documentNormalizat.ToString());
+        DocumentGlobal.AdaugaDocumentInLista(Titlu, _documentNormalizat.ToString());
     }
 
     private void TransformaArticolInCuvinte(StringBuilder continutFisier)
     {
-        var cuvinte = ReturneazaCuvinteleNormalizate(continutFisier.ToString());
+        var listaCuvinte = ReturneazaCuvinteleNormalizate(continutFisier.ToString());
 
-        var listaCuvinte = cuvinte.ToList();
-        DocumentScriereGlobal.AdaugaAtributeInLista(listaCuvinte);
+        DocumentGlobal.AdaugaAtributeDinArticol(listaCuvinte);
         DictionarGlobal.AdaugaCuvinteInLista(listaCuvinte);
 
         foreach (var cuvant in listaCuvinte) AdaugaCuvantInDictionar(cuvant, DictionarCuvinte);
     }
 
-    private IEnumerable<string> ReturneazaCuvinteleNormalizate(string continutFisier)
+    private List<string> ReturneazaCuvinteleNormalizate(string continutFisier)
     {
         var cuvinte = continutFisier.Split().Select(cuvant =>
                 ReturneazaRadacinaCuvantului(
                     cuvant.StergePunctuatia().ToLowerInvariant().Trim()))
-            .Where(cuvant => !string.IsNullOrEmpty(cuvant) &&
-                             UtilitatiCuvinte.EsteCuvantValid(cuvant))
-            .Except(_fisierDictionarStopWords.ListaStopWords).Distinct();
+            .Where(cuvant => UtilitatiCuvinte.EsteCuvantValid(cuvant))
+            .Except(_fisierDictionarStopWords.ListaStopWords).Distinct().ToList();
         return cuvinte;
     }
 
-    public string ReturneazaRadacinaCuvantului(string cuvant)
+    private string ReturneazaRadacinaCuvantului(string cuvant)
     {
-        return _stemmerCuvinte.Stem(cuvant);
+        _stemmerCuvinte.SetCurrent(cuvant);
+        _stemmerCuvinte.Stem();
+        return _stemmerCuvinte.GetCurrent();
     }
 
-    public void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
+    private void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
     {
         if (dictionar.ContainsKey(cuvant))
             dictionar[cuvant] = dictionar[cuvant] + 1;
@@ -103,10 +102,10 @@ public class Articol : IDisposable
             dictionar.Add(cuvant, 1);
     }
 
-    public static void ScrieArticoleInFiserGlobal()
+    public static void ScrieDateInFisiereGlobale()
     {
         DictionarGlobal.ScrieCuvinteleInFisier();
-        DocumentScriereGlobal.ScrieDate();
+        DocumentGlobal.ScrieDate();
     }
 
     public int ExtrageFrecventaMaxima()

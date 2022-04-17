@@ -30,8 +30,8 @@ public static class UtilitatiCuvinte
 
     public static void InlocuiesteApostrofuri(string paragraf)
     {
-        paragraf = paragraf.Replace("'s", "");
-        paragraf = paragraf.Replace("'d", "");
+        paragraf = paragraf.Replace("'s", String.Empty);
+        paragraf = paragraf.Replace("'d", String.Empty);
         paragraf = paragraf.Replace("' ", " ");
     }
 
@@ -72,8 +72,8 @@ public static class UtilitatiCuvinte
 
     private static bool ContineDoarLitereMari(string cuvant)
     {
-        for (var caracter = 0; caracter < cuvant.Length; caracter++)
-            if (char.IsLetter(cuvant[caracter]) && !char.IsUpper(cuvant[caracter]))
+        foreach (var t in cuvant)
+            if (char.IsLetter(t) && !char.IsUpper(t))
                 return false;
 
         return true;

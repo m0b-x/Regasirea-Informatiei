@@ -1,15 +1,15 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using Regasirea_Informatiei;
 
-using Regasirea_Informatiei;
-
-var articole = new List<Articol>();
+var articole = new List<Articol>(7500);
 
 
-const string numeFolder = "Documente";
+const string numeFolder = "Documente32";
 const string patternFisier = "*.xml";
-foreach (var fisier in Directory.EnumerateFiles(numeFolder, patternFisier))
-    articole.Add(new Articol(fisier.Split('/')[1]));
+foreach (var pathFisier in Directory.EnumerateFiles(numeFolder, patternFisier))
+    articole.Add(new Articol(pathFisier));
 
-Articol.ScrieArticoleInFiserGlobal();
-var interogator = new Interogator(ref Articol.DocumentScriereGlobal);
+Articol.ScrieDateInFisiereGlobale();
+
+var interogator = new Interogator(ref Articol.DocumentGlobal);
 interogator.InterogheazaArticole(articole);
+
