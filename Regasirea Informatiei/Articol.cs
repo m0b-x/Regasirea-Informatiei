@@ -5,26 +5,18 @@ namespace Regasirea_Informatiei;
 
 public class Articol : IDisposable
 {
-    public void Dispose()
-    {
-        _cititorXml.Dispose();
-    }
-
     public static string NumeFisierDocumente = "Documente";
     public static DictionarGlobal DictionarGlobal = new();
     public static DocumentGlobal DocumentScriereGlobal = new();
 
     private static readonly DictionarStopWords _fisierDictionarStopWords = new();
     private static readonly SnowballStemmer _stemmerCuvinte = new();
-
-    private readonly string _numeFisier;
     private readonly XmlTextReader _cititorXml;
 
+    private readonly string _numeFisier;
 
-    private StringBuilder _documentNormalizat = new StringBuilder(10000);
-    public string Titlu { get; private set; }
 
-    public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
+    private StringBuilder _documentNormalizat = new(10000);
 
     public Articol(string numeFisier)
     {
@@ -38,7 +30,16 @@ public class Articol : IDisposable
             Console.WriteLine(@"Exceptie citire fisier: {0}", exceptie);
         }
 
-            CitesteDate();
+        CitesteDate();
+    }
+
+    public string Titlu { get; private set; }
+
+    public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
+
+    public void Dispose()
+    {
+        _cititorXml.Dispose();
     }
 
     public void CitesteDate()
@@ -52,21 +53,21 @@ public class Articol : IDisposable
                 else if (_cititorXml.NodeType == XmlNodeType.Element && _cititorXml.Name == "title")
                     Titlu = _cititorXml.ReadElementString();
         }
+
         TransformaArticolInCuvinte(continutFisier);
         RealizeazaFormaVectoriala();
     }
-    
+
     public void RealizeazaFormaVectoriala()
     {
         _documentNormalizat = new StringBuilder();
         _documentNormalizat.Append($"{Titlu}# ");
         foreach (var cuvant in DictionarCuvinte)
-        {
             _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
-        }
 
         DocumentScriereGlobal.AdaugaDocumentInLista(Titlu, _documentNormalizat.ToString());
     }
+
     private void TransformaArticolInCuvinte(StringBuilder continutFisier)
     {
         var cuvinte = ReturneazaCuvinteleNormalizate(continutFisier.ToString());
@@ -75,10 +76,7 @@ public class Articol : IDisposable
         DocumentScriereGlobal.AdaugaAtributeInLista(listaCuvinte);
         DictionarGlobal.AdaugaCuvinteInLista(listaCuvinte);
 
-        foreach (var cuvant in listaCuvinte)
-        {
-            AdaugaCuvantInDictionar(cuvant, DictionarCuvinte);
-        }
+        foreach (var cuvant in listaCuvinte) AdaugaCuvantInDictionar(cuvant, DictionarCuvinte);
     }
 
     private IEnumerable<string> ReturneazaCuvinteleNormalizate(string continutFisier)

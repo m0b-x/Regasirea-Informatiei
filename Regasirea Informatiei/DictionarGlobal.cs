@@ -2,82 +2,57 @@ namespace Regasirea_Informatiei;
 
 public class DictionarGlobal
 {
-    private readonly string _numeFisier = "Dictionar.txt";
-    private List<string> _listaCuvinte = new List<string>(30000);
-    private int _marimeDictionar;
-
-    public string NumeFisier
-    {
-        get { return _numeFisier; }
-    }
-    public List<string> ListaCuvinte
-    {
-        get{return _listaCuvinte;}
-    }
-
-    public int MarimeDictionar
-    {
-        get { return _marimeDictionar; }
-    }
-    
     public DictionarGlobal()
     {
-        _marimeDictionar = 0;
-        bool fisierulExista = File.Exists(_numeFisier);
+        MarimeDictionar = 0;
+        var fisierulExista = File.Exists(NumeFisier);
         if (fisierulExista)
-        {
             CitesteCuvinte();
-        }
         else
-        {
-            File.Create(_numeFisier);
-        }
+            File.Create(NumeFisier);
     }
+
+    public string NumeFisier { get; } = "Dictionar.txt";
+
+    public List<string> ListaCuvinte { get; } = new(30000);
+
+    public int MarimeDictionar { get; private set; }
 
     private void CitesteCuvinte()
     {
-        using (StreamReader cititorCuvinte = new StreamReader(_numeFisier))
+        using (var cititorCuvinte = new StreamReader(NumeFisier))
         {
-            string[] cuvinte = cititorCuvinte.ReadToEnd().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            
-            foreach (string cuvant in cuvinte)
-            {
-                AdaugaCuvantInLista(cuvant);
-            }
-        } 
-        _listaCuvinte.Sort();
+            var cuvinte = cititorCuvinte.ReadToEnd().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var cuvant in cuvinte) AdaugaCuvantInLista(cuvant);
+        }
+
+        ListaCuvinte.Sort();
     }
 
     public void ScrieCuvinteleInFisier()
     {
-        using (StreamWriter scriitorCuvinte = new StreamWriter(_numeFisier,false))
+        using (var scriitorCuvinte = new StreamWriter(NumeFisier, false))
         {
             scriitorCuvinte.AutoFlush = true;
-            foreach (var cuvant in _listaCuvinte)
-            {
-                scriitorCuvinte.Write($"{cuvant} ");
-            }
+            foreach (var cuvant in ListaCuvinte) scriitorCuvinte.Write($"{cuvant} ");
         }
     }
 
-    
+
     public void AdaugaCuvinteInLista(IEnumerable<string> cuvinte)
     {
-        foreach(string cuvant in cuvinte)
-        {
-            AdaugaCuvantInLista(cuvant);
-        }
-        _listaCuvinte.Sort();
+        foreach (var cuvant in cuvinte) AdaugaCuvantInLista(cuvant);
+        ListaCuvinte.Sort();
         ScrieCuvinteleInFisier();
     }
 
     private void AdaugaCuvantInLista(string cuvant)
     {
-        
-        if (!_listaCuvinte.Contains(cuvant))
+        if (!ListaCuvinte.Contains(cuvant))
         {
-            _listaCuvinte.Add(cuvant);
-            _marimeDictionar++;
+            ListaCuvinte.Add(cuvant);
+            MarimeDictionar++;
         }
     }
 }

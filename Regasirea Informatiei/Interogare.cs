@@ -5,29 +5,28 @@ public class Interogare
     private static readonly DictionarStopWords FisierDictionarStopWords = new();
     private static readonly SnowballStemmer StemmerCuvinte = new();
 
-
-    public string StringInterogare { get; }
-    
-
-    public Dictionary<string, int> DictionarCuvinte { get; } = new();
-    
-    public DictionarGlobal DictionarGlobal { get; }
-
-    public Dictionary<int, int> DictionarNormalizat { get; } = new();
-
-    public Interogare(string interogare,DictionarGlobal dictionarGlobal)
+    public Interogare(string interogare, DictionarGlobal dictionarGlobal)
     {
         DictionarGlobal = dictionarGlobal;
         StringInterogare = interogare;
         CitesteDate();
     }
 
+
+    public string StringInterogare { get; }
+
+
+    public Dictionary<string, int> DictionarCuvinte { get; } = new();
+
+    public DictionarGlobal DictionarGlobal { get; }
+
+    public Dictionary<int, int> DictionarNormalizat { get; } = new();
+
     public void CitesteDate()
     {
         var continutiterogare = StringInterogare;
 
         TransformaInterogareInCuvinte(continutiterogare);
-        
     }
 
     private void TransformaInterogareInCuvinte(string continutiterogare)
@@ -58,6 +57,7 @@ public class Interogare
     {
         return StemmerCuvinte.Stem(cuvant);
     }
+
     public void AdaugaCuvantInDictionarNormalizat(int cuvantIndex, Dictionary<int, int> dictionar)
     {
         if (DictionarNormalizat.ContainsKey(cuvantIndex))
@@ -65,6 +65,7 @@ public class Interogare
         else
             DictionarNormalizat.Add(cuvantIndex, 1);
     }
+
     public void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
     {
         if (DictionarCuvinte.ContainsKey(cuvant))
