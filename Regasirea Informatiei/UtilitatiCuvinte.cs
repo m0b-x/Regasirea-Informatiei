@@ -1,10 +1,13 @@
+using System.Text;
+using System.Text.RegularExpressions;
+
 namespace Regasirea_Informatiei;
 
 public static class UtilitatiCuvinte
 {
     public static bool EsteCuvantValid(string cuvant)
     {
-        if (!AreCaractereSpeciale(cuvant) && !ContineDoarCifre(cuvant) && !String.IsNullOrEmpty(cuvant))
+        if (!AreCaractereSpeciale(cuvant) && !ContineCifre(cuvant) && !String.IsNullOrEmpty(cuvant))
         {
             return true;
         }
@@ -13,7 +16,18 @@ public static class UtilitatiCuvinte
             return false;
         }
     }
-
+    public static string StergePunctuatia(this string s)
+    {
+        var cuvantFaraPunctuatie = new StringBuilder();
+        foreach (char c in s)
+        {
+            if (!char.IsPunctuation(c))
+            {
+                cuvantFaraPunctuatie.Append(c);
+            }
+        }
+        return cuvantFaraPunctuatie.ToString();
+    }
     public static bool EsteAbreviere(string cuvant)
     {
         if (cuvant.All(Char.IsUpper))
@@ -38,6 +52,10 @@ public static class UtilitatiCuvinte
         return cuvant.Any(caracter => !Char.IsLetterOrDigit(caracter));
     }
 
+    private static bool ContineCifre(string cuvant)
+    {
+        return Regex.IsMatch(cuvant, @"\d");
+    }
     private static bool ContineDoarCaractere(string cuvant)
     {
         foreach (Char caracter in cuvant)
