@@ -1,4 +1,3 @@
-using System.Text;
 using System.Xml;
 
 namespace Regasirea_Informatiei;
@@ -19,9 +18,8 @@ public class Articol : IDisposable
 
     private readonly string _numeFisier;
     private string _titlu;
-    private StringBuilder _documentNormalizat = new StringBuilder();
     private readonly XmlTextReader _cititorXml;
-    private Dictionary<string, int> _dictionarCuvinte = new Dictionary<string, int>();
+    private Dictionary<string, int> _dictionarCuvinte = new Dictionary<string, int>(30000);
 
 
     public String Titlu
@@ -36,7 +34,6 @@ public class Articol : IDisposable
 
     public Articol(String numeFisier)
     {
-
         _numeFisier = numeFisier;
         try
         {
@@ -46,24 +43,11 @@ public class Articol : IDisposable
         {
             Console.WriteLine(@"Exceptie citire fisier: {0}", exceptie);
         }
-        CitesteTitlu();
-        CitesteCuvinte();
-        RealizeazaFormaVectoriala();
+
+        CitesteDate();
     }
 
-    public void CitesteTitlu()
-    {
-        while (_cititorXml.Read())
-        {
-            if (_cititorXml.NodeType == XmlNodeType.Element && _cititorXml.Name == "title")
-            {
-                _titlu = (_cititorXml.ReadElementString());
-                break;
-            }
-        }
-    }
-
-    public void CitesteCuvinte()
+    public void CitesteDate()
     {
         while (_cititorXml.Read())
         {
@@ -71,51 +55,39 @@ public class Articol : IDisposable
             {
                 String continutFisier = (_cititorXml.ReadElementString());
 
-                var punctuatii = continutFisier.Where(Char.IsPunctuation).Distinct().ToArray();
-                IEnumerable<string> cuvinte = continutFisier.Split().Select(punctuatie => punctuatie.Trim(punctuatii));
+                var cuvinte = ReturneazaCuvinteleNormalizate(continutFisier);
 
-                cuvinte = cuvinte.Select(cuvant => cuvant.ToLowerInvariant().Replace(" ", "")).ToList()
-                    .Where(cuvant => !string.IsNullOrEmpty(cuvant) &&
-                                     UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
-                                     !UtilitatiCuvinte.EsteAbreviere(cuvant))
-                    .Except(_fisierDictionarStopWords.ListaStopWords).Distinct();
+                var listaCuvinte = cuvinte.ToList();
+                DocumentScriereGlobal.AdaugaAtributeInLista(listaCuvinte);
+                DictionarGlobal.AdaugaCuvinteInLista(listaCuvinte);
 
-                cuvinte = ReturneazaRadacinileCuvintelor(cuvinte);
-
-                DocumentScriereGlobal.AdaugaAtributeInLista(cuvinte);
-                DictionarGlobal.AdaugaCuvinteInLista(cuvinte);
-
-                foreach (string cuvant in cuvinte)
+                foreach (string cuvant in listaCuvinte)
                 {
                     AdaugaCuvantInDictionar(cuvant, _dictionarCuvinte);
                 }
             }
+            else if (_cititorXml.NodeType == XmlNodeType.Element && _cititorXml.Name == "title")
+            {
+                _titlu = (_cititorXml.ReadElementString());
+            }
         }
     }
 
-    public IEnumerable<string> ReturneazaRadacinileCuvintelor(IEnumerable<string> cuvinte)
+    private IEnumerable<string> ReturneazaCuvinteleNormalizate(string continutFisier)
     {
-        List<string> cuvinteStemate = new List<string>();
-
-        foreach (var cuvant in cuvinte)
-        {
-            if (!cuvinteStemate.Contains(cuvant))
-                cuvinteStemate.Add(_stemmerCuvinte.Stem(cuvant));
-        }
-
-        return cuvinteStemate.AsEnumerable();
+        IEnumerable<string> cuvinte = continutFisier.Split().Select(cuvant =>
+                ReturneazaRadacinaCuvantului(
+                    UtilitatiCuvinte.StergePunctuatia(cuvant).ToLowerInvariant().Trim()))
+            .Where(cuvant => !string.IsNullOrEmpty(cuvant) &&
+                             UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
+                             !UtilitatiCuvinte.EsteAbreviere(cuvant))
+            .Except(_fisierDictionarStopWords.ListaStopWords).Distinct();
+        return cuvinte;
     }
 
-    public void RealizeazaFormaVectoriala()
+    public string ReturneazaRadacinaCuvantului(string cuvant)
     {
-        _documentNormalizat = new StringBuilder();
-        _documentNormalizat.Append($"{_titlu}# ");
-        foreach (var cuvant in _dictionarCuvinte)
-        {
-            _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
-        }
-
-        DocumentScriereGlobal.AdaugaDocumentInLista(_titlu, _documentNormalizat.ToString());
+        return _stemmerCuvinte.Stem(cuvant);
     }
 
     public void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
