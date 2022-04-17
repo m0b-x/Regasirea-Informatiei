@@ -68,6 +68,12 @@ public static class UtilitatiCuvinte
 
         return true;
     }
+    public static string StergeSpatiile(string cuvant)
+    {
+        return new string(cuvant.ToCharArray()
+            .Where(c => !Char.IsWhiteSpace(c))
+            .ToArray());
+    }
     private static bool ContineDoarCifre(string cuvant)
     {
         foreach (Char caracter in cuvant)

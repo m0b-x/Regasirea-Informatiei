@@ -9,58 +9,73 @@ namespace Regasirea_Informatiei
     /// </summary>
     public class SnowballStemmer
     {
-        
-        private readonly char[] _alphabet = 
+        private readonly char[] _alphabet =
             Enumerable
                 .Range('a', 'z' - 'a' + 1)
-                .Select(c => (char)c)
-                .Concat(new[]{'\''}).ToArray();
-        public char[] Alphabet { get { return _alphabet; } }
+                .Select(c => (char) c)
+                .Concat(new[] {'\''}).ToArray();
+
+        public char[] Alphabet
+        {
+            get { return _alphabet; }
+        }
 
         private readonly char[] _vowels = "aeiouy".ToArray();
-        public char[] Vowels { get { return _vowels; } }
 
-        private readonly string[] _doubles = 
-            { "bb", "dd", "ff", "gg", "mm", "nn", "pp", "rr", "tt" };
-        public string[] Doubles { get { return _doubles; } }
+        public char[] Vowels
+        {
+            get { return _vowels; }
+        }
+
+        private readonly string[] _doubles =
+            {"bb", "dd", "ff", "gg", "mm", "nn", "pp", "rr", "tt"};
+
+        public string[] Doubles
+        {
+            get { return _doubles; }
+        }
 
         private readonly char[] _liEndings = "cdeghkmnrt".ToArray();
-        public char[] LiEndings { get { return _liEndings; } }
+
+        public char[] LiEndings
+        {
+            get { return _liEndings; }
+        }
 
         private readonly char[] _nonShortConsonants = "wxY".ToArray();
 
         private readonly Dictionary<string, string> _exceptions = new Dictionary<string, string>
-            {
-                {"skis", "ski"},
-                {"skies", "sky"},
-                {"dying", "die"},
-                {"lying", "lie"},
-                {"tying", "tie"},
-                {"idly", "idl"},
-                {"gently", "gentl"},
-                {"ugly", "ugli"},
-                {"early", "earli"},
-                {"only", "onli"},
-                {"singly", "singl"},
-                {"sky", "sky"},
-                {"news", "news"},
-                {"howe", "howe"},
-                {"atlas", "atlas"},
-                {"cosmos", "cosmos"},
-                {"bias", "bias"},
-                {"andes", "andes"}
-            };
+        {
+            {"skis", "ski"},
+            {"skies", "sky"},
+            {"dying", "die"},
+            {"lying", "lie"},
+            {"tying", "tie"},
+            {"idly", "idl"},
+            {"gently", "gentl"},
+            {"ugly", "ugli"},
+            {"early", "earli"},
+            {"only", "onli"},
+            {"singly", "singl"},
+            {"sky", "sky"},
+            {"news", "news"},
+            {"howe", "howe"},
+            {"atlas", "atlas"},
+            {"cosmos", "cosmos"},
+            {"bias", "bias"},
+            {"andes", "andes"}
+        };
 
         private readonly string[] _exceptionsPart2 = new[]
-            {
-                "inning", "outing", "canning", "herring", "earring",
-                "proceed", "exceed", "succeed"
-            };
+        {
+            "inning", "outing", "canning", "herring", "earring",
+            "proceed", "exceed", "succeed"
+        };
 
         private readonly string[] _exceptionsRegion1 = new[]
-            {
-                "gener", "arsen", "commun"
-            };
+        {
+            "gener", "arsen", "commun"
+        };
 
         public string Stem(string word)
         {
@@ -132,6 +147,7 @@ namespace Regasirea_Informatiei
             {
                 word += newSuffix;
             }
+
             return word;
         }
 
@@ -142,6 +158,7 @@ namespace Regasirea_Informatiei
                 final = ReplaceSuffix(word, oldSuffix, newSuffix);
                 return true;
             }
+
             final = word;
             return false;
         }
@@ -157,6 +174,7 @@ namespace Regasirea_Informatiei
             {
                 word = word.Substring(1);
             }
+
             return word;
         }
 
@@ -172,6 +190,7 @@ namespace Regasirea_Informatiei
             {
                 return except.Length;
             }
+
             return GetRegion(word, 0);
         }
 
@@ -196,6 +215,7 @@ namespace Regasirea_Informatiei
                     foundVowel = true;
                     continue;
                 }
+
                 if (foundVowel && IsConsonant(word[i]))
                 {
                     return i + 1;
@@ -258,11 +278,12 @@ namespace Regasirea_Informatiei
                         chars[i] = 'Y';
                     }
                 }
-                else if(Vowels.Contains(chars[i - 1]) && chars[i] == 'y')
+                else if (Vowels.Contains(chars[i - 1]) && chars[i] == 'y')
                 {
                     chars[i] = 'Y';
                 }
             }
+
             return new string(chars);
         }
 
@@ -277,6 +298,7 @@ namespace Regasirea_Informatiei
                     return ReplaceSuffix(word, suffix);
                 }
             }
+
             return word;
         }
 
@@ -286,6 +308,7 @@ namespace Regasirea_Informatiei
             {
                 return ReplaceSuffix(word, "sses", "ss");
             }
+
             if (word.EndsWith("ied") || word.EndsWith("ies"))
             {
                 var restOfWord = word.Substring(0, word.Length - 3);
@@ -293,12 +316,15 @@ namespace Regasirea_Informatiei
                 {
                     return restOfWord + "i";
                 }
+
                 return restOfWord + "ie";
             }
+
             if (word.EndsWith("us") || word.EndsWith("ss"))
             {
                 return word;
             }
+
             if (word.EndsWith("s"))
             {
                 if (word.Length < 3)
@@ -315,39 +341,45 @@ namespace Regasirea_Informatiei
                     }
                 }
             }
+
             return word;
         }
 
         public string Step1BRemoveLySuffixes(string word, int r1)
         {
-            foreach (var suffix in new [] {"eedly", "eed"}.Where(word.EndsWith))
+            foreach (var suffix in new[] {"eedly", "eed"}.Where(word.EndsWith))
             {
-                if(SuffixInR1(word, r1, suffix))
+                if (SuffixInR1(word, r1, suffix))
                 {
                     return ReplaceSuffix(word, suffix, "ee");
                 }
+
                 return word;
             }
 
-            foreach (var suffix in new [] {"ed", "edly", "ing", "ingly"}.Where(word.EndsWith))
+            foreach (var suffix in new[] {"ed", "edly", "ing", "ingly"}.Where(word.EndsWith))
             {
-                var trunc = ReplaceSuffix(word, suffix);//word.Substring(0, word.Length - suffix.Length);
+                var trunc = ReplaceSuffix(word, suffix); //word.Substring(0, word.Length - suffix.Length);
                 if (trunc.Any(IsVowel))
                 {
                     if (new[] {"at", "bl", "iz"}.Any(trunc.EndsWith))
                     {
                         return trunc + "e";
                     }
+
                     if (Doubles.Any(trunc.EndsWith))
                     {
                         return trunc.Substring(0, trunc.Length - 1);
                     }
+
                     if (IsShortWord(trunc))
                     {
                         return trunc + "e";
                     }
+
                     return trunc;
                 }
+
                 return word;
             }
 
@@ -362,36 +394,37 @@ namespace Regasirea_Informatiei
             {
                 return word.Substring(0, word.Length - 1) + "i";
             }
+
             return word;
         }
 
         public string Step2ReplaceSuffixes(string word, int r1)
         {
             var suffixes = new Dictionary<string, string>
-                {
-                    {"ization", "ize"},
-                    {"ational", "ate"},
-                    {"ousness", "ous"},
-                    {"iveness", "ive"},
-                    {"fulness", "ful"},
-                    {"tional", "tion"},
-                    {"lessli", "less"},
-                    {"biliti", "ble"},
-                    {"entli", "ent"},
-                    {"ation", "ate"},
-                    {"alism", "al"},
-                    {"aliti", "al"},
-                    {"fulli", "ful"},
-                    {"ousli", "ous"},
-                    {"iviti", "ive"},
-                    {"enci", "ence"},
-                    {"anci", "ance"},
-                    {"abli", "able"},
-                    {"izer", "ize"},
-                    {"ator", "ate"},
-                    {"alli", "al"},
-                    {"bli", "ble"}
-                };
+            {
+                {"ization", "ize"},
+                {"ational", "ate"},
+                {"ousness", "ous"},
+                {"iveness", "ive"},
+                {"fulness", "ful"},
+                {"tional", "tion"},
+                {"lessli", "less"},
+                {"biliti", "ble"},
+                {"entli", "ent"},
+                {"ation", "ate"},
+                {"alism", "al"},
+                {"aliti", "al"},
+                {"fulli", "ful"},
+                {"ousli", "ous"},
+                {"iviti", "ive"},
+                {"enci", "ence"},
+                {"anci", "ance"},
+                {"abli", "able"},
+                {"izer", "ize"},
+                {"ator", "ate"},
+                {"alli", "al"},
+                {"bli", "ble"}
+            };
             foreach (var suffix in suffixes)
             {
                 if (word.EndsWith(suffix.Key))
@@ -402,12 +435,13 @@ namespace Regasirea_Informatiei
                     {
                         return final;
                     }
+
                     return word;
                 }
             }
 
-            if (word.EndsWith("ogi") 
-                && SuffixInR1(word, r1, "ogi") 
+            if (word.EndsWith("ogi")
+                && SuffixInR1(word, r1, "ogi")
                 && word[word.Length - 4] == 'l')
             {
                 return ReplaceSuffix(word, "ogi", "og");
@@ -427,16 +461,16 @@ namespace Regasirea_Informatiei
         public string Step3ReplaceSuffixes(string word, int r1, int r2)
         {
             var suffixes = new Dictionary<string, string>
-                {
-                    {"ational", "ate"},
-                    {"tional", "tion"},
-                    {"alize", "al"},
-                    {"icate", "ic"},
-                    {"iciti", "ic"},
-                    {"ical", "ic"},
-                    {"ful", null},
-                    {"ness", null}
-                };
+            {
+                {"ational", "ate"},
+                {"tional", "tion"},
+                {"alize", "al"},
+                {"icate", "ic"},
+                {"iciti", "ic"},
+                {"ical", "ic"},
+                {"ful", null},
+                {"ness", null}
+            };
             foreach (var suffix in suffixes.Where(s => word.EndsWith(s.Key)))
             {
                 string final;
@@ -449,7 +483,7 @@ namespace Regasirea_Informatiei
 
             if (word.EndsWith("ative"))
             {
-                if(SuffixInR1(word, r1, "ative") && SuffixInR2(word, r2, "ative"))
+                if (SuffixInR1(word, r1, "ative") && SuffixInR2(word, r2, "ative"))
                 {
                     return ReplaceSuffix(word, "ative", null);
                 }
@@ -461,11 +495,11 @@ namespace Regasirea_Informatiei
         public string Step4RemoveSomeSuffixesInR2(string word, int r2)
         {
             foreach (var suffix in new[]
-                {
-                    "al", "ance", "ence", "er", "ic", "able", "ible", "ant", 
-                    "ement", "ment", "ent", "ism", "ate", "iti", "ous", 
-                    "ive", "ize"
-                })
+                     {
+                         "al", "ance", "ence", "er", "ic", "able", "ible", "ant",
+                         "ement", "ment", "ent", "ism", "ate", "iti", "ous",
+                         "ive", "ize"
+                     })
             {
                 if (word.EndsWith(suffix))
                 {
@@ -473,16 +507,18 @@ namespace Regasirea_Informatiei
                     {
                         return ReplaceSuffix(word, suffix);
                     }
+
                     return word;
                 }
             }
 
-            if (word.EndsWith("ion") && 
+            if (word.EndsWith("ion") &&
                 SuffixInR2(word, r2, "ion") &&
                 new[] {'s', 't'}.Contains(word[word.Length - 4]))
             {
                 return ReplaceSuffix(word, "ion");
             }
+
             return word;
         }
 
@@ -490,14 +526,14 @@ namespace Regasirea_Informatiei
         {
             if (word.EndsWith("e") &&
                 (SuffixInR2(word, r2, "e") ||
-                    (SuffixInR1(word, r1, "e") && 
-                        !EndsInShortSyllable(ReplaceSuffix(word, "e")))))
+                 (SuffixInR1(word, r1, "e") &&
+                  !EndsInShortSyllable(ReplaceSuffix(word, "e")))))
             {
                 return ReplaceSuffix(word, "e");
             }
 
-            if (word.EndsWith("l") && 
-                SuffixInR2(word, r2, "l") && 
+            if (word.EndsWith("l") &&
+                SuffixInR2(word, r2, "l") &&
                 word.Length > 1 &&
                 word[word.Length - 2] == 'l')
             {

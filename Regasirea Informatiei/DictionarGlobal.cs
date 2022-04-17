@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-
 namespace Regasirea_Informatiei;
 
 public class DictionarGlobal
@@ -76,6 +73,7 @@ public class DictionarGlobal
 
     private void AdaugaCuvantInLista(string cuvant)
     {
+        
         if (!_listaCuvinte.Contains(cuvant))
         {
             _listaCuvinte.Add(cuvant);

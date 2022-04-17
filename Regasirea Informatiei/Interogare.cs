@@ -1,122 +1,85 @@
-using System.Text;
-
 namespace Regasirea_Informatiei;
 
 public class Interogare
 {
-
-    public static DictionarGlobal DictionarGlobal = new DictionarGlobal();
-
-    private static DictionarStopWords _fisierDictionarStopWords = new DictionarStopWords();
-    private static SnowballStemmer _stemmerCuvinte = new();
-
-    private readonly string _interogare;
-    private StringBuilder _documentNormalizat = new StringBuilder();
-    private Dictionary<string, int> _dictionarCuvinte = new Dictionary<string, int>();
-    private Dictionary<int, int> _dictionarNormalizat = new Dictionary<int, int>();
+    private static readonly DictionarStopWords FisierDictionarStopWords = new();
+    private static readonly SnowballStemmer StemmerCuvinte = new();
 
 
-    public String StringInterogare
+    public string StringInterogare { get; }
+    
+
+    public Dictionary<string, int> DictionarCuvinte { get; } = new();
+    
+    public DictionarGlobal DictionarGlobal { get; }
+
+    public Dictionary<int, int> DictionarNormalizat { get; } = new();
+
+    public Interogare(string interogare,DictionarGlobal dictionarGlobal)
     {
-        get { return _interogare; }
+        DictionarGlobal = dictionarGlobal;
+        StringInterogare = interogare;
+        CitesteDate();
     }
 
-    public Dictionary<string, int> DictionarCuvinte
+    public void CitesteDate()
     {
-        get { return _dictionarCuvinte; }
-    }
-    public Dictionary<int, int> DictionarNormalizat
-    {
-        get { return (_dictionarNormalizat); }
-    }
+        var continutiterogare = StringInterogare;
 
-    public Interogare(String interogare)
-    {
-        _interogare = interogare;
-        CitesteCuvinte();
-        RealizeazaFormaVectoriala();
+        TransformaInterogareInCuvinte(continutiterogare);
+        
     }
 
-    public void CitesteCuvinte()
+    private void TransformaInterogareInCuvinte(string continutiterogare)
     {
-        String continutInterogare = _interogare;
+        var cuvinte = ReturneazaCuvinteleNormalizate(continutiterogare);
 
-        var punctuatii = continutInterogare.Where(Char.IsPunctuation).Distinct().ToArray();
-        IEnumerable<string> cuvinte = continutInterogare.Split().Select(punctuatie => punctuatie.Trim(punctuatii));
+        var listaCuvinte = cuvinte.ToList();
 
-        cuvinte = cuvinte.Select(cuvant => cuvant.ToLowerInvariant().Replace(" ", "")).ToList()
+        foreach (var cuvant in listaCuvinte)
+        {
+            AdaugaCuvantInDictionarNormalizat(DictionarGlobal.ListaCuvinte.IndexOf(cuvant), DictionarNormalizat);
+            AdaugaCuvantInDictionar(cuvant, DictionarCuvinte);
+        }
+    }
+
+    private IEnumerable<string> ReturneazaCuvinteleNormalizate(string continutFisier)
+    {
+        var cuvinte = continutFisier.Split().Select(cuvant =>
+                ReturneazaRadacinaCuvantului(
+                    cuvant.StergePunctuatia().ToLowerInvariant().Trim()))
             .Where(cuvant => !string.IsNullOrEmpty(cuvant) &&
-                             UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
-                             !UtilitatiCuvinte.EsteAbreviere(cuvant)).Except(_fisierDictionarStopWords.ListaStopWords)
-            .Distinct();
-
-        cuvinte = ReturneazaRadacinileCuvintelor(cuvinte);
-
-        foreach (string cuvant in cuvinte)
-        {
-            AdaugaCuvantInDictionar(cuvant, _dictionarCuvinte);
-            AdaugaCuvantInDictionar(DictionarGlobal.ListaCuvinte.IndexOf(cuvant), _dictionarNormalizat);
-            
-        }
+                             UtilitatiCuvinte.EsteCuvantValid(cuvant))
+            .Except(FisierDictionarStopWords.ListaStopWords).Distinct();
+        return cuvinte;
     }
 
-    public IEnumerable<string> ReturneazaRadacinileCuvintelor(IEnumerable<string> cuvinte)
+    public string ReturneazaRadacinaCuvantului(string cuvant)
     {
-        List<string> cuvinteStemate = new List<string>();
-
-        foreach (var cuvant in cuvinte)
-        {
-            if (!cuvinteStemate.Contains(cuvant))
-                cuvinteStemate.Add(_stemmerCuvinte.Stem(cuvant));
-        }
-
-        return cuvinteStemate.AsEnumerable();
+        return StemmerCuvinte.Stem(cuvant);
     }
-
-    public void RealizeazaFormaVectoriala()
+    public void AdaugaCuvantInDictionarNormalizat(int cuvantIndex, Dictionary<int, int> dictionar)
     {
-        _documentNormalizat = new StringBuilder();
-        _documentNormalizat.Append($"{_interogare}# ");
-        foreach (var cuvant in _dictionarCuvinte)
-        {
-            _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
-        }
-    }
-    public void AdaugaCuvantInDictionar(int cuvant, Dictionary<int, int> dictionar)
-    {
-        if (_dictionarNormalizat.ContainsKey(cuvant))
-        {
-            _dictionarNormalizat[cuvant] = dictionar[cuvant] + 1;
-        }
+        if (DictionarNormalizat.ContainsKey(cuvantIndex))
+            DictionarNormalizat[cuvantIndex] = dictionar[cuvantIndex] + 1;
         else
-        {
-            _dictionarNormalizat.Add(cuvant, 1);
-        }
+            DictionarNormalizat.Add(cuvantIndex, 1);
     }
     public void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
     {
-        if (_dictionarCuvinte.ContainsKey(cuvant))
-        {
-            _dictionarCuvinte[cuvant] = dictionar[cuvant] + 1;
-        }
+        if (DictionarCuvinte.ContainsKey(cuvant))
+            DictionarCuvinte[cuvant] = dictionar[cuvant] + 1;
         else
-        {
-            _dictionarCuvinte.Add(cuvant, 1);
-        }
+            DictionarCuvinte.Add(cuvant, 1);
     }
-    
+
     public int ExtrageFrecventaMaxima()
     {
-        int max = -1;
-        foreach (var cuvant in _dictionarCuvinte)
-        {
+        var max = -1;
+        foreach (var cuvant in DictionarCuvinte)
             if (cuvant.Value > max)
-            {
                 max = cuvant.Value;
-            }
-        }
 
         return max;
-
     }
 }

@@ -21,6 +21,7 @@ public class Articol : IDisposable
     private readonly XmlTextReader _cititorXml;
 
 
+    private StringBuilder _documentNormalizat = new StringBuilder(10000);
     public string Titlu { get; private set; }
 
     public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
@@ -31,13 +32,13 @@ public class Articol : IDisposable
         try
         {
             _cititorXml = new XmlTextReader($@"{NumeFisierDocumente}/{_numeFisier}");
-            CitesteDate();
         }
         catch (Exception exceptie)
         {
             Console.WriteLine(@"Exceptie citire fisier: {0}", exceptie);
         }
 
+            CitesteDate();
     }
 
     public void CitesteDate()
@@ -51,10 +52,21 @@ public class Articol : IDisposable
                 else if (_cititorXml.NodeType == XmlNodeType.Element && _cititorXml.Name == "title")
                     Titlu = _cititorXml.ReadElementString();
         }
-
         TransformaArticolInCuvinte(continutFisier);
+        RealizeazaFormaVectoriala();
     }
+    
+    public void RealizeazaFormaVectoriala()
+    {
+        _documentNormalizat = new StringBuilder();
+        _documentNormalizat.Append($"{Titlu}# ");
+        foreach (var cuvant in DictionarCuvinte)
+        {
+            _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
+        }
 
+        DocumentScriereGlobal.AdaugaDocumentInLista(Titlu, _documentNormalizat.ToString());
+    }
     private void TransformaArticolInCuvinte(StringBuilder continutFisier)
     {
         var cuvinte = ReturneazaCuvinteleNormalizate(continutFisier.ToString());
@@ -66,7 +78,6 @@ public class Articol : IDisposable
         foreach (var cuvant in listaCuvinte)
         {
             AdaugaCuvantInDictionar(cuvant, DictionarCuvinte);
-            Console.WriteLine(cuvant);
         }
     }
 
@@ -88,10 +99,10 @@ public class Articol : IDisposable
 
     public void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
     {
-        if (DictionarCuvinte.ContainsKey(cuvant))
-            DictionarCuvinte[cuvant] = dictionar[cuvant] + 1;
+        if (dictionar.ContainsKey(cuvant))
+            dictionar[cuvant] = dictionar[cuvant] + 1;
         else
-            DictionarCuvinte.Add(cuvant, 1);
+            dictionar.Add(cuvant, 1);
     }
 
     public static void ScrieArticoleInFiserGlobal()

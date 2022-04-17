@@ -2,7 +2,7 @@ namespace Regasirea_Informatiei;
 
 public class DictionarStopWords
 {
-    private static readonly string[] _separatorCitire = new[] {"\r\n", "\r", "\n"};
+    private static readonly string[] SeparatorCitire = new[] {"\r\n", "\r", "\n"};
     private readonly string _numeFisier = "StopWords.txt";
     private List<string> _listaStopWords = new List<string>(450);
 
@@ -28,7 +28,7 @@ public class DictionarStopWords
     {
         using (StreamReader cititorCuvinte = new StreamReader(_numeFisier))
         {
-            string[] cuvinte = cititorCuvinte.ReadToEnd().Split(_separatorCitire,StringSplitOptions.None);
+            string[] cuvinte = cititorCuvinte.ReadToEnd().Split(SeparatorCitire,StringSplitOptions.None);
             foreach (string cuvant in cuvinte)
             {
                 _listaStopWords.Add(cuvant);

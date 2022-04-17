@@ -3,12 +3,12 @@ namespace Regasirea_Informatiei;
 public class DocumentGlobal
 {
     
-    private static readonly  char[] _delimitatoriAtribute = {' ', ':'};
+    private static readonly  char[] DelimitatoriAtribute = {' ', ':'};
     private static readonly string _simbolAtribut = "@";
     
     private readonly string _numeFisier = "FisierGlobal.txt";
-    private List<string> _documenteCaSiStringuri = new List<string>(8000);
-    private Dictionary<string, Dictionary<int, int>> _documenteCaSiDictionare = new(8000);
+    private static List<string> _documenteCaSiStringuri = new List<string>(8000);
+    private static Dictionary<string, Dictionary<int, int>> _documenteCaSiDictionare = new(8000);
     private SortedSet<string> _listaAtribute = new SortedSet<string>();
 
     public List<string> DocumenteCaSiStringuri
@@ -43,7 +43,7 @@ public class DocumentGlobal
         {
             while (!cititor.EndOfStream)
             {
-                string linie = cititor.ReadLine();
+                string linie = cititor.ReadLine() ?? throw new InvalidOperationException();
 
                 if (!String.IsNullOrWhiteSpace(linie))
                 {
@@ -54,14 +54,23 @@ public class DocumentGlobal
                     else
                     {
                         _documenteCaSiStringuri.Add(linie);
+                        
                         KeyValuePair<string, Dictionary<int, int>> pereche = ConvertesteDocumentInDictionar(linie);
-                        _documenteCaSiDictionare.Add(pereche.Key,pereche.Value);
+                        AdaugaCuvantInDictionar(_documenteCaSiDictionare,pereche);
                     }
                 }
             }
         }        
     }
 
+    public void AdaugaCuvantInDictionar(Dictionary<string, Dictionary<int, int>> dictionar,KeyValuePair<string, Dictionary<int, int>> pereche)
+    {
+        if (!dictionar.ContainsKey(pereche.Key.Split('#')[0]))
+        {
+            dictionar.Add(pereche.Key, pereche.Value);
+        }
+
+    }
     public void ScrieDate()
     {
         using (var scriitor = new StreamWriter(_numeFisier,false))
@@ -97,7 +106,7 @@ public class DocumentGlobal
     }
     public void AdaugaDocumentInLista(string titlu, string document)
     {
-        if (!EsteDocumentInLista(titlu))
+        if (!_documenteCaSiStringuri.Contains(titlu))
         {
             _documenteCaSiStringuri.Add(document);
         }
@@ -105,12 +114,11 @@ public class DocumentGlobal
 
     public KeyValuePair<string, Dictionary<int, int>> ConvertesteDocumentInDictionar(string document)
     {
-        
-        KeyValuePair<string, Dictionary<int, int>> dictionarCaSiPereche = new();
+        KeyValuePair<string, Dictionary<int, int>> dictionarCaSiPereche;
         string titluDocument = ReturneazaTitlulDocumentului(document);
         
         string dateDocument = document.Split('#')[1];
-        List<string> dateCaString = dateDocument.Split(_delimitatoriAtribute, StringSplitOptions.TrimEntries).ToList();
+        List<string> dateCaString = dateDocument.Split(DelimitatoriAtribute, StringSplitOptions.TrimEntries).ToList();
         List<int> dateCaNumere = new();
         foreach (var data in dateCaString)
         {
@@ -130,12 +138,6 @@ public class DocumentGlobal
         dictionarCaSiPereche = new KeyValuePair<string, Dictionary<int, int>>(titluDocument, dictionarAtribut);
         return dictionarCaSiPereche;
     }
-    public static string StergeSpatiile(string cuvant)
-    {
-        return new string(cuvant.ToCharArray()
-            .Where(c => !Char.IsWhiteSpace(c))
-            .ToArray());
-    }
     public string ReturneazaTitlulDocumentului(string document)
     {
         string titlu = document.Split('#')[0];
@@ -150,6 +152,22 @@ public class DocumentGlobal
             _listaAtribute.Add(atribut);
         }
     }
+
+    public static int ReturneazaNrDocumenteCuAtributul(string atribut)
+    {
+        int numaratorDocumente = 0;
+        int indexCuvant = Articol.DictionarGlobal.ListaCuvinte.IndexOf(atribut);
+        string atributNormalizat = $"{indexCuvant}:";
+        foreach (var document in _documenteCaSiStringuri)
+        { 
+            if (document.Split('#')[1].Contains(atribut))
+            {
+                numaratorDocumente++;
+            }
+        }
+        return numaratorDocumente;
+    }
+    
     
     public void AdaugaAtributeInLista(IEnumerable<string> atribute)
     {
