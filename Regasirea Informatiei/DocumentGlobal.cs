@@ -1,3 +1,6 @@
+
+using System.Runtime.InteropServices;
+
 namespace Regasirea_Informatiei;
 
 public class DocumentGlobal
@@ -43,29 +46,53 @@ public class DocumentGlobal
             {
                 var linie = cititor.ReadLine() ?? throw new InvalidOperationException();
 
-                
-                    if (linie.StartsWith(SimbolAtribut))
-                    {
-                        AdaugaAtributInListaLaCitire(linie.Substring(1));
-                    }
-                    else if (!string.IsNullOrWhiteSpace(linie))
-                    {
-                        AdaugaDocumentInDictionarLaCitire(linie);
-                        AdaugaCuvantInDictionarLaCitire(_documenteCaDictionare, ConvertesteDocumentInDictionar(linie));
-                    }
+
+                if (linie.StartsWith(SimbolAtribut))
+                {
+                    AdaugaAtributInListaLaCitire(linie.Substring(1));
+                }
+                else if (!string.IsNullOrWhiteSpace(linie))
+                {
+                    AdaugaCuvantInDictionarLaCitire(_documenteCaDictionare, linie);
+                }
             }
         }
     }
 
-    private void AdaugaDocumentInDictionarLaCitire(string document)
+    private void AdaugaCuvantInDictionarLaCitire(Dictionary<string, Dictionary<int, int>> dictionar, string linie)
     {
-        _documenteCaSiStringuri.Add(document);
+        var pereche =
+            ConvertesteDocumentInDictionar(linie);
+
+        if (!dictionar.ContainsKey(pereche.Key))
+        {
+            _documenteCaSiStringuri.Add(linie);
+            dictionar.Add(pereche.Key, pereche.Value);
+        }
     }
 
-    private void AdaugaCuvantInDictionarLaCitire(Dictionary<string, Dictionary<int, int>> dictionar,
-        KeyValuePair<string, Dictionary<int, int>> pereche)
+    private void AdaugaCuvantInDictionar(Dictionary<string, Dictionary<int, int>> dictionar, string linie)
     {
-        dictionar.Add(pereche.Key, pereche.Value);
+        var pereche =
+            ConvertesteDocumentInDictionar(linie);
+        if (!dictionar.ContainsKey(pereche.Key))
+        {
+            _documenteCaSiStringuri.Add(linie);
+            dictionar.Add(pereche.Key, pereche.Value);
+        }
+        else 
+        {
+            pereche = new($"{pereche.Key}(1)",pereche.Value);
+            if (!dictionar.ContainsKey(pereche.Key))
+            {
+                _documenteCaSiStringuri.Add(linie.Replace(pereche.Key, pereche.Key));
+                dictionar.Add(pereche.Key, pereche.Value);
+                if (_esteNevoieDeSuprascriere == false)
+                {
+                    _esteNevoieDeSuprascriere = true;
+                }
+            }
+        }
     }
 
 
@@ -73,7 +100,7 @@ public class DocumentGlobal
     {
         if (_esteNevoieDeSuprascriere)
         {
-            Console.WriteLine("Da");
+            Console.WriteLine("DAS");
             using (var scriitor = new StreamWriter(_numeFisier, false))
             {
                 scriitor.AutoFlush = true;
@@ -88,25 +115,10 @@ public class DocumentGlobal
 
     public void AdaugaDocumentInLista(string document)
     {
-        string dateDocument = document.Split(SimbolTitlu)[1];
-        foreach(var documentNormalizat in _documenteCaSiStringuri)
+        if (!_documenteCaSiStringuri.Contains(document)) 
         {
-            if (documentNormalizat.Contains(dateDocument))
-            {
-                
-                return;
-            }
-            else
-            {
-                Console.WriteLine(dateDocument+"SEPARATOR\n"+documentNormalizat+"\n\n\n");
-            }
+            AdaugaCuvantInDictionar(_documenteCaDictionare, document);
         }
-
-        if (_esteNevoieDeSuprascriere == false)
-        {
-            _esteNevoieDeSuprascriere = true;
-        }
-        _documenteCaSiStringuri.Add(document);
     }
 
     private KeyValuePair<string, Dictionary<int, int>> ConvertesteDocumentInDictionar(string document)
@@ -118,7 +130,7 @@ public class DocumentGlobal
         var dateCaString = dateDocument.Split(DelimitatoriAtribute, StringSplitOptions.RemoveEmptyEntries);
         List<int> dateCaNumere = new(5000);
         foreach (var data in dateCaString)
-                dateCaNumere.Add(int.Parse(data));
+            dateCaNumere.Add(int.Parse(data));
 
         Dictionary<int, int> dictionarAtribut = new(5000);
 
@@ -133,9 +145,10 @@ public class DocumentGlobal
     {
         return document.Split(SimbolTitlu);
     }
+
     private void AdaugaAtributInListaLaCitire(string atribut)
     {
-       _listaAtribute.Add(atribut);
+        _listaAtribute.Add(atribut);
     }
 
     private void AdaugaAtributInListaDinArticol(string atribut)

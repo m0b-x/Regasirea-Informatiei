@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text;
 using System.Xml;
 using SF.Snowball.Ext;
@@ -31,19 +30,19 @@ public class Articol
     private void CitesteDate()
     {
         var continutFisier = new StringBuilder(50000);
-        using (var _cititorXml = new XmlTextReader(_pathFisier))
+        using (var cititorXml = new XmlTextReader(_pathFisier))
         {
-            while (_cititorXml.Read())
+            while (cititorXml.Read())
             {
-                if (_cititorXml.NodeType == XmlNodeType.Element)
+                if (cititorXml.NodeType == XmlNodeType.Element)
                 {
-                    switch (_cititorXml.Name)
+                    switch (cititorXml.Name)
                     {
                         case "p":
-                            continutFisier.Append(_cititorXml.ReadElementString());
+                            continutFisier.Append(cititorXml.ReadElementString());
                             break;
                         case "title":
-                            Titlu = _cititorXml.ReadElementString();
+                            Titlu = cititorXml.ReadElementString();
                             break;
                     }
                 }
@@ -55,7 +54,7 @@ public class Articol
     }
 
     private void RealizeazaFormaVectoriala()
-    {;
+    {
         _documentNormalizat.Append($"{Titlu}# ");
         foreach (var cuvant in DictionarCuvinte)
             _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
