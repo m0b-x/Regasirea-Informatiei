@@ -2,27 +2,33 @@ namespace Regasirea_Informatiei;
 
 public class DictionarGlobal
 {
-    public DictionarGlobal()
-    {
-        MarimeDictionar = 0;
-        var fisierulExista = File.Exists(NumeFisier);
-        if (fisierulExista)
-            CitesteCuvinte();
-        else
-            File.Create(NumeFisier);
-    }
+    private bool _esteNevoieDeSupraScriere;
+    
     public string NumeFisier { get; } = "Dictionar.txt";
 
     public List<string> ListaCuvinte { get; } = new(30000);
 
-    public int MarimeDictionar { get; private set; }
+    public int MarimeDictionar => ListaCuvinte.Count;
+    
+    public DictionarGlobal()
+    {
+        if (File.Exists(NumeFisier))
+        {
+            CitesteCuvinte();
+        }
+        else
+        {
+            File.Create(NumeFisier);
+            _esteNevoieDeSupraScriere = true;
+        }
+    }
 
     private void CitesteCuvinte()
     {
         using (var cititorCuvinte = new StreamReader(NumeFisier))
         {
             var cuvinte = cititorCuvinte.ReadToEnd().
-                Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList().Distinct().Except(ListaCuvinte);
+                Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().Except(ListaCuvinte);
 
             foreach (var cuvant in cuvinte) ListaCuvinte.Add(cuvant);
         }
@@ -30,10 +36,13 @@ public class DictionarGlobal
 
     public void ScrieCuvinteleInFisier()
     {
-        using (var scriitorCuvinte = new StreamWriter(NumeFisier, false))
+        if (_esteNevoieDeSupraScriere)
         {
-            scriitorCuvinte.AutoFlush = true;
-            foreach (var cuvant in ListaCuvinte) scriitorCuvinte.Write($"{cuvant} ");
+            using (var scriitorCuvinte = new StreamWriter(NumeFisier, false))
+            {
+                scriitorCuvinte.AutoFlush = true;
+                foreach (var cuvant in ListaCuvinte) scriitorCuvinte.Write($"{cuvant} ");
+            }
         }
     }
 
@@ -48,8 +57,11 @@ public class DictionarGlobal
     {
         if (!ListaCuvinte.Contains(cuvant))
         {
+            if (_esteNevoieDeSupraScriere == false)
+            {
+                _esteNevoieDeSupraScriere = true;
+            }
             ListaCuvinte.Add(cuvant);
-            MarimeDictionar++;
         }
     }
 }

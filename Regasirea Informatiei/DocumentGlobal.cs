@@ -3,8 +3,9 @@ namespace Regasirea_Informatiei;
 public class DocumentGlobal
 {
     private static readonly char[] DelimitatoriAtribute = {' ', ':'};
-    private static readonly string _simbolAtribut = "@";
-    private readonly List<string> _documenteCaSiStringuri = new(8000);
+    private static readonly char SimbolAtribut = '@';
+    private static readonly char SimbolTitlu = '#';
+    private readonly List<string> _documenteCaSiStringuri = new List<string>(8000);
     private Dictionary<string, Dictionary<int, int>> _documenteCaDictionare = new(8000);
 
     private bool _esteNevoieDeSuprascriere;
@@ -19,8 +20,7 @@ public class DocumentGlobal
 
     public DocumentGlobal()
     {
-        var fisierulExista = File.Exists(_numeFisier);
-        if (fisierulExista)
+        if (File.Exists(_numeFisier))
         {
             CitesteDate();
             _esteNevoieDeSuprascriere = false;
@@ -43,62 +43,84 @@ public class DocumentGlobal
             {
                 var linie = cititor.ReadLine() ?? throw new InvalidOperationException();
 
-                if (!string.IsNullOrWhiteSpace(linie))
-                {
-                    if (linie.StartsWith(_simbolAtribut))
+                
+                    if (linie.StartsWith(SimbolAtribut))
                     {
-                        AdaugaAtributInLista(linie.Split()[0].Trim());
+                        AdaugaAtributInListaLaCitire(linie.Substring(1));
                     }
-                    else
+                    else if (!string.IsNullOrWhiteSpace(linie))
                     {
-                        _documenteCaSiStringuri.Add(linie);
-
-                        var pereche = ConvertesteDocumentInDictionar(linie);
-                        AdaugaCuvantInDictionar(_documenteCaDictionare, pereche);
+                        AdaugaDocumentInDictionarLaCitire(linie);
+                        AdaugaCuvantInDictionarLaCitire(_documenteCaDictionare, ConvertesteDocumentInDictionar(linie));
                     }
-                }
             }
         }
     }
 
-    private void AdaugaCuvantInDictionar(Dictionary<string, Dictionary<int, int>> dictionar,
+    private void AdaugaDocumentInDictionarLaCitire(string document)
+    {
+        _documenteCaSiStringuri.Add(document);
+    }
+
+    private void AdaugaCuvantInDictionarLaCitire(Dictionary<string, Dictionary<int, int>> dictionar,
         KeyValuePair<string, Dictionary<int, int>> pereche)
     {
-        if (!dictionar.ContainsKey(pereche.Key.Split('#')[0])) dictionar.Add(pereche.Key, pereche.Value);
+        dictionar.Add(pereche.Key, pereche.Value);
     }
+
 
     public void ScrieDate()
     {
         if (_esteNevoieDeSuprascriere)
         {
+            Console.WriteLine("Da");
             using (var scriitor = new StreamWriter(_numeFisier, false))
             {
                 scriitor.AutoFlush = true;
-                foreach (var atribut in _listaAtribute) scriitor.WriteLine($"{atribut}");
+                foreach (var atribut in _listaAtribute) scriitor.WriteLine($"{SimbolAtribut}{atribut}");
 
-                scriitor.WriteLine("\n@data\n");
+                scriitor.WriteLine("@data");
 
                 foreach (var document in _documenteCaSiStringuri) scriitor.WriteLine(document);
             }
         }
     }
-    public void AdaugaDocumentInLista(string titlu, string document)
+
+    public void AdaugaDocumentInLista(string document)
     {
-        if (!_documenteCaSiStringuri.Contains(titlu)) _documenteCaSiStringuri.Add(document);
+        string dateDocument = document.Split(SimbolTitlu)[1];
+        foreach(var documentNormalizat in _documenteCaSiStringuri)
+        {
+            if (documentNormalizat.Contains(dateDocument))
+            {
+                
+                return;
+            }
+            else
+            {
+                Console.WriteLine(dateDocument+"SEPARATOR\n"+documentNormalizat+"\n\n\n");
+            }
+        }
+
+        if (_esteNevoieDeSuprascriere == false)
+        {
+            _esteNevoieDeSuprascriere = true;
+        }
+        _documenteCaSiStringuri.Add(document);
     }
 
     private KeyValuePair<string, Dictionary<int, int>> ConvertesteDocumentInDictionar(string document)
     {
-        var titluDocument = ReturneazaTitlulDocumentului(document);
+        var dateDocumet = ReturneazaDateleDocumentului(document);
 
-        var dateDocument = document.Split('#')[1];
-        var dateCaString = dateDocument.Split(DelimitatoriAtribute, StringSplitOptions.TrimEntries).ToList();
-        List<int> dateCaNumere = new(30000);
+        var titluDocument = dateDocumet[0];
+        var dateDocument = dateDocumet[1];
+        var dateCaString = dateDocument.Split(DelimitatoriAtribute, StringSplitOptions.RemoveEmptyEntries);
+        List<int> dateCaNumere = new(5000);
         foreach (var data in dateCaString)
-            if (!string.IsNullOrWhiteSpace(data))
                 dateCaNumere.Add(int.Parse(data));
 
-        Dictionary<int, int> dictionarAtribut = new(30000);
+        Dictionary<int, int> dictionarAtribut = new(5000);
 
         for (var index = 0; index < dateCaNumere.Count - 1; index += 2)
             dictionarAtribut.Add(dateCaNumere[index], dateCaNumere[index + 1]);
@@ -107,17 +129,15 @@ public class DocumentGlobal
         return dictionarCaSiPereche;
     }
 
-    private string ReturneazaTitlulDocumentului(string document)
+    private string[] ReturneazaDateleDocumentului(string document)
     {
-        var titlu = document.Split('#')[0];
-
-        return titlu;
+        return document.Split(SimbolTitlu);
+    }
+    private void AdaugaAtributInListaLaCitire(string atribut)
+    {
+       _listaAtribute.Add(atribut);
     }
 
-    private void AdaugaAtributInLista(string atribut)
-    {
-        if (!_listaAtribute.Contains(atribut)) _listaAtribute.Add(atribut);
-    }
     private void AdaugaAtributInListaDinArticol(string atribut)
     {
         if (!_listaAtribute.Contains(atribut))
@@ -134,8 +154,7 @@ public class DocumentGlobal
     {
         foreach (var atribut in atribute)
         {
-            AdaugaAtributInListaDinArticol($"@{atribut}");
+            AdaugaAtributInListaDinArticol(atribut);
         }
-        
     }
 }

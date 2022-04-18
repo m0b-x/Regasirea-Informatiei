@@ -34,9 +34,7 @@ public class Interogare
     {
         var cuvinte = ReturneazaCuvinteleNormalizate(continutiterogare);
 
-        var listaCuvinte = cuvinte.ToList();
-
-        foreach (var cuvant in listaCuvinte)
+        foreach (var cuvant in cuvinte)
         {
             AdaugaCuvantInDictionarNormalizat(DictionarGlobal.ListaCuvinte.IndexOf(cuvant), DictionarNormalizat);
             AdaugaCuvantInDictionar(cuvant, DictionarCuvinte);
@@ -77,7 +75,7 @@ public class Interogare
 
     public int ExtrageFrecventaMaxima()
     {
-        var max = -1;
+        int max = 0;
         foreach (var cuvant in DictionarCuvinte)
             if (cuvant.Value > max)
                 max = cuvant.Value;

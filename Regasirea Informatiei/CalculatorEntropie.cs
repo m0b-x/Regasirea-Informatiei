@@ -1,21 +1,22 @@
 namespace Regasirea_Informatiei;
 
+
+
 public static class CalculatorEntropie
 {
     public static double CalculeazaValoareaEntropiei(string mesaj)
     {
         double entropia = 0;
-        var tabel = new Dictionary<char, double>();
-
+        var dictionarLitere = new Dictionary<char, double>(35);
 
         foreach (var caracter in mesaj)
-            if (tabel.ContainsKey(caracter))
-                tabel[caracter]++;
+            if (dictionarLitere.ContainsKey(caracter))
+                dictionarLitere[caracter]++;
             else
-                tabel.Add(caracter, 1);
-        foreach (var litera in tabel)
+                dictionarLitere.Add(caracter, 1);
+        foreach (var litera in dictionarLitere)
         {
-            var frecventa = litera.Value / mesaj.Length;
+            double frecventa = litera.Value / mesaj.Length;
             entropia += frecventa * (Math.Log(frecventa) / Math.Log(2));
         }
 

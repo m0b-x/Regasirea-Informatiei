@@ -7,8 +7,7 @@ public class DictionarStopWords
 
     public DictionarStopWords()
     {
-        var fisierulExista = File.Exists(_numeFisier);
-        if (fisierulExista)
+        if (File.Exists(_numeFisier))
             CitesteDate();
         else
             File.Create(_numeFisier);
@@ -20,15 +19,8 @@ public class DictionarStopWords
     {
         using (var cititorCuvinte = new StreamReader(_numeFisier))
         {
-            var cuvinte = cititorCuvinte.ReadToEnd().Split(SeparatorCitire, StringSplitOptions.None);
+            var cuvinte = cititorCuvinte.ReadToEnd().Split(SeparatorCitire, StringSplitOptions.RemoveEmptyEntries);
             foreach (var cuvant in cuvinte) ListaStopWords.Add(cuvant);
         }
-    }
-
-    public bool EsteStopWord(string cuvant)
-    {
-        if (ListaStopWords.Contains(cuvant))
-            return true;
-        return false;
     }
 }
