@@ -15,16 +15,38 @@ public class Articol
     private readonly string _pathFisier;
 
     private StringBuilder _documentNormalizat = new(5000);
+    public string Titlu { get; private set; }
 
+    public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
+    
     public Articol(string pathFisier)
     {
         _pathFisier = pathFisier;
         CitesteDate();
     }
 
-    public string Titlu { get; private set; }
+    public Articol(StringBuilder documentNormalizat)
+    {
+        _pathFisier = "NONE";
 
-    public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
+        _documentNormalizat = documentNormalizat;
+        var dateDocumet = documentNormalizat.ToString().Split('#');
+
+        Titlu = dateDocumet[0];
+        var dateDocument = dateDocumet[1];
+        var separatori = new[] {':', ' '};
+        var dateCaString = dateDocument.Split(separatori, StringSplitOptions.RemoveEmptyEntries);
+        List<int> dateCaNumere = new(5000);
+        foreach (var data in dateCaString)
+        {
+            dateCaNumere.Add(int.Parse(data));
+        }
+
+        for (var index = 0; index < dateCaNumere.Count - 1; index += 2)
+        {
+            AdaugaCuvantInDictionar(DictionarGlobal.ListaCuvinte[dateCaNumere[index]],dateCaNumere[index + 1], DictionarCuvinte);
+        }
+    }
 
 
     private void CitesteDate()
@@ -52,13 +74,17 @@ public class Articol
         TransformaArticolInCuvinte(continutFisier);
         RealizeazaFormaVectoriala();
     }
-
-    private void RealizeazaFormaVectoriala()
+    private void AdaugaCuvantInDictionar(string cuvant,int frecventa, Dictionary<string, int> dictionar)
+    { 
+        dictionar.Add(cuvant, frecventa);
+    }
+    private void RealizeazaFormaVectoriala() 
     {
         _documentNormalizat.Append($"{Titlu}# ");
         foreach (var cuvant in DictionarCuvinte)
             _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
 
+        _documentNormalizat.Remove(_documentNormalizat.Length - 1, 1);
         DocumentGlobal.AdaugaDocumentInLista(_documentNormalizat.ToString());
     }
 

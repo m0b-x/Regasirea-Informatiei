@@ -1,5 +1,4 @@
-
-using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Regasirea_Informatiei;
 
@@ -8,19 +7,31 @@ public class DocumentGlobal
     private static readonly char[] DelimitatoriAtribute = {' ', ':'};
     private static readonly char SimbolAtribut = '@';
     private static readonly char SimbolTitlu = '#';
+    private static DictionarGlobal _dictionarGlobal = new DictionarGlobal();
     private readonly List<string> _documenteCaSiStringuri = new List<string>(8000);
     private Dictionary<string, Dictionary<int, int>> _documenteCaDictionare = new(8000);
 
     private bool _esteNevoieDeSuprascriere;
     private readonly string _numeFisier = "FisierGlobal.txt";
     private readonly SortedSet<string> _listaAtribute = new();
+    private List<Articol> _listaArticoleNormalizate = new List<Articol>(8000);
 
     public Dictionary<string, Dictionary<int, int>> DocumenteCaSiDictionare
     {
-        get { return _documenteCaDictionare; }
+        get => _documenteCaDictionare;
         set => _documenteCaDictionare = value;
     }
 
+    public List<Articol> ListaArticoleNormalizate
+    {
+        get => _listaArticoleNormalizate;
+        set => _listaArticoleNormalizate = value;
+    }
+
+    public DictionarGlobal DictionarGlobal
+    {
+        get => _dictionarGlobal;
+    }
     public DocumentGlobal()
     {
         if (File.Exists(_numeFisier))
@@ -53,6 +64,7 @@ public class DocumentGlobal
                 }
                 else if (!string.IsNullOrWhiteSpace(linie))
                 {
+                    _listaArticoleNormalizate.Add(new Articol(new StringBuilder(linie)));
                     AdaugaCuvantInDictionarLaCitire(_documenteCaDictionare, linie);
                 }
             }
@@ -64,11 +76,8 @@ public class DocumentGlobal
         var pereche =
             ConvertesteDocumentInDictionar(linie);
 
-        if (!dictionar.ContainsKey(pereche.Key))
-        {
             _documenteCaSiStringuri.Add(linie);
             dictionar.Add(pereche.Key, pereche.Value);
-        }
     }
 
     private void AdaugaCuvantInDictionar(Dictionary<string, Dictionary<int, int>> dictionar, string linie)
@@ -79,18 +88,9 @@ public class DocumentGlobal
         {
             _documenteCaSiStringuri.Add(linie);
             dictionar.Add(pereche.Key, pereche.Value);
-        }
-        else 
-        {
-            pereche = new($"{pereche.Key}(1)",pereche.Value);
-            if (!dictionar.ContainsKey(pereche.Key))
+            if (_esteNevoieDeSuprascriere == false)
             {
-                _documenteCaSiStringuri.Add(linie.Replace(pereche.Key, pereche.Key));
-                dictionar.Add(pereche.Key, pereche.Value);
-                if (_esteNevoieDeSuprascriere == false)
-                {
-                    _esteNevoieDeSuprascriere = true;
-                }
+                _esteNevoieDeSuprascriere = true;
             }
         }
     }
@@ -100,7 +100,6 @@ public class DocumentGlobal
     {
         if (_esteNevoieDeSuprascriere)
         {
-            Console.WriteLine("DAS");
             using (var scriitor = new StreamWriter(_numeFisier, false))
             {
                 scriitor.AutoFlush = true;
@@ -117,6 +116,7 @@ public class DocumentGlobal
     {
         if (!_documenteCaSiStringuri.Contains(document)) 
         {
+            _listaArticoleNormalizate.Add(new Articol(new StringBuilder(document)));
             AdaugaCuvantInDictionar(_documenteCaDictionare, document);
         }
     }
@@ -158,6 +158,7 @@ public class DocumentGlobal
             _listaAtribute.Add(atribut);
             if (_esteNevoieDeSuprascriere == false)
             {
+                
                 _esteNevoieDeSuprascriere = true;
             }
         }

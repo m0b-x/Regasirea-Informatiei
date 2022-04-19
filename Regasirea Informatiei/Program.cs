@@ -1,23 +1,22 @@
 ﻿using System.Diagnostics;
 using Regasirea_Informatiei;
 
-var articole = new List<Articol>(100);
-
-
 const string numeFolder = "Documente32";
 const string patternFisier = "*.xml";
+//Etapa 1
+var cronometru = new Stopwatch();
+cronometru.Start();
 
-var timer = new Stopwatch();
-timer.Start();
-
+List<Articol> articole = new List<Articol>(32);
 foreach (var pathFisier in Directory.EnumerateFiles(numeFolder, patternFisier))
     articole.Add(new Articol(pathFisier));
 
-Console.WriteLine($"Timp citire {timer.Elapsed}");
-Articol.ScrieDateInFisiereGlobale();
 
-timer.Stop();
-var interogator = new Interogator(ref Articol.DocumentGlobal, ref articole);
+cronometru.Stop();
+Console.WriteLine($"Timp citire {cronometru.Elapsed}");
+Articol.ScrieDateInFisiereGlobale();
+//Etapa 2
+var interogator = new Interogator(ref Articol.DocumentGlobal);
 interogator.RealizeazaVectoreleNormalizateDeAtribute();
 interogator.InterogheazaArticole();
 
