@@ -19,4 +19,3 @@ Articol.ScrieDateInFisiereGlobale();
 var interogator = new Interogator(ref Articol.DocumentGlobal);
 interogator.RealizeazaVectoreleNormalizateDeAtribute();
 interogator.InterogheazaArticole();
-

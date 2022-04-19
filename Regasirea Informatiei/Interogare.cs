@@ -3,8 +3,15 @@ using SF.Snowball.Ext;
 
 public class Interogare
 {
-    private static readonly DictionarStopWords FisierDictionarStopWords = new();
-    private static readonly EnglishStemmer StemmerCuvinte = new();
+    private readonly EnglishStemmer _stemmerCuvinte = new();
+
+    public string StringInterogare { get; }
+
+    public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
+
+    public DictionarGlobal DictionarGlobal { get; }
+
+    public Dictionary<int, int> DictionarNormalizat { get; } = new(30000);
 
     public Interogare(string interogare, DictionarGlobal dictionarGlobal)
     {
@@ -13,15 +20,6 @@ public class Interogare
         CitesteDate();
     }
 
-
-    public string StringInterogare { get; }
-
-
-    public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
-
-    public DictionarGlobal DictionarGlobal { get; }
-
-    public Dictionary<int, int> DictionarNormalizat { get; } = new(30000);
 
     private void CitesteDate()
     {
@@ -41,20 +39,22 @@ public class Interogare
         }
     }
 
-    private IEnumerable<string> ReturneazaCuvinteleNormalizate(string continutFisier)
+    private List<string> ReturneazaCuvinteleNormalizate(string continutFisier)
     {
-        var cuvinte = continutFisier.Split().Select(cuvant =>
-                ReturneazaRadacinaCuvantului(cuvant.StergePunctuatia().ToLowerInvariant().Trim()))
-            .Where(cuvant =>UtilitatiCuvinte.EsteCuvantValid(cuvant))
-            .Except(FisierDictionarStopWords.ListaStopWords).Distinct();
-        return cuvinte;
+        var cuvinte = continutFisier.InlocuiestePunctuatia().ToLowerInvariant().
+            Split(' ')
+            .Where(cuvant => UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
+                             !DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvant))
+            .Select(cuvant => ReturneazaRadacinaCuvantului(cuvant));
+
+        return cuvinte.ToList();
     }
 
     private string ReturneazaRadacinaCuvantului(string cuvant)
     {
-        StemmerCuvinte.SetCurrent(cuvant);
-        StemmerCuvinte.Stem();
-        return StemmerCuvinte.GetCurrent();
+        _stemmerCuvinte.SetCurrent(cuvant);
+        _stemmerCuvinte.Stem();
+        return _stemmerCuvinte.GetCurrent();
     }
 
     private void AdaugaCuvantInDictionarNormalizat(int cuvantIndex, Dictionary<int, int> dictionar)

@@ -7,6 +7,7 @@ public class DictionarStopWords
 
     public DictionarStopWords()
     {
+        Console.WriteLine("DA");
         if (File.Exists(_numeFisier))
             CitesteDate();
         else

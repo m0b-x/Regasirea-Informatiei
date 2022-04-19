@@ -7,9 +7,11 @@ public class DocumentGlobal
     private static readonly char[] DelimitatoriAtribute = {' ', ':'};
     private static readonly char SimbolAtribut = '@';
     private static readonly char SimbolTitlu = '#';
-    private static DictionarGlobal _dictionarGlobal = new DictionarGlobal();
+    
+    private DictionarGlobal _dictionarGlobal;
     private readonly List<string> _documenteCaSiStringuri = new List<string>(8000);
     private Dictionary<string, Dictionary<int, int>> _documenteCaDictionare = new(8000);
+    
 
     private bool _esteNevoieDeSuprascriere;
     private readonly string _numeFisier = "FisierGlobal.txt";
@@ -22,6 +24,7 @@ public class DocumentGlobal
         set => _documenteCaDictionare = value;
     }
 
+    
     public List<Articol> ListaArticoleNormalizate
     {
         get => _listaArticoleNormalizate;
@@ -31,9 +34,11 @@ public class DocumentGlobal
     public DictionarGlobal DictionarGlobal
     {
         get => _dictionarGlobal;
+        set => _dictionarGlobal = value;
     }
-    public DocumentGlobal()
+    public DocumentGlobal(DictionarGlobal dictionarGlobal)
     {
+        _dictionarGlobal = dictionarGlobal;
         if (File.Exists(_numeFisier))
         {
             CitesteDate();

@@ -2,13 +2,14 @@ namespace Regasirea_Informatiei;
 
 public class DictionarGlobal
 {
-    private bool _esteNevoieDeSupraScriere;
-    
+    public static DictionarStopWords DictionarStopWords = new ();
     public string NumeFisier { get; } = "Dictionar.txt";
 
     public List<string> ListaCuvinte { get; } = new(30000);
 
     public int MarimeDictionar => ListaCuvinte.Count;
+    
+    private bool _esteNevoieDeSupraScriere;
     
     public DictionarGlobal()
     {
@@ -28,7 +29,7 @@ public class DictionarGlobal
         using (var cititorCuvinte = new StreamReader(NumeFisier))
         {
             var cuvinte = cititorCuvinte.ReadToEnd().
-                Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().Except(ListaCuvinte);
+                Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var cuvant in cuvinte) ListaCuvinte.Add(cuvant);
         }

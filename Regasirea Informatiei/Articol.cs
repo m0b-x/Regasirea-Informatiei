@@ -7,18 +7,17 @@ namespace Regasirea_Informatiei;
 public class Articol
 {
     public static DictionarGlobal DictionarGlobal = new();
-    public static DocumentGlobal DocumentGlobal = new();
+    public static DocumentGlobal DocumentGlobal = new(DictionarGlobal);
 
-    private readonly DictionarStopWords _fisierDictionarStopWords = new();
+    public string Titlu { get; private set; }
+    public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
     private readonly EnglishStemmer _stemmerCuvinte = new();
 
     private readonly string _pathFisier;
 
     private StringBuilder _documentNormalizat = new(5000);
-    public string Titlu { get; private set; }
 
-    public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
-    
+
     public Articol(string pathFisier)
     {
         _pathFisier = pathFisier;
@@ -44,7 +43,8 @@ public class Articol
 
         for (var index = 0; index < dateCaNumere.Count - 1; index += 2)
         {
-            AdaugaCuvantInDictionar(DictionarGlobal.ListaCuvinte[dateCaNumere[index]],dateCaNumere[index + 1], DictionarCuvinte);
+            AdaugaCuvantInDictionar(DictionarGlobal.ListaCuvinte[dateCaNumere[index]], dateCaNumere[index + 1],
+                DictionarCuvinte);
         }
     }
 
@@ -74,15 +74,20 @@ public class Articol
         TransformaArticolInCuvinte(continutFisier);
         RealizeazaFormaVectoriala();
     }
-    private void AdaugaCuvantInDictionar(string cuvant,int frecventa, Dictionary<string, int> dictionar)
-    { 
+
+    private void AdaugaCuvantInDictionar(string cuvant, int frecventa, Dictionary<string, int> dictionar)
+    {
         dictionar.Add(cuvant, frecventa);
     }
-    private void RealizeazaFormaVectoriala() 
+
+    private void RealizeazaFormaVectoriala()
     {
         _documentNormalizat.Append($"{Titlu}# ");
+
         foreach (var cuvant in DictionarCuvinte)
+        {
             _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
+        }
 
         _documentNormalizat.Remove(_documentNormalizat.Length - 1, 1);
         DocumentGlobal.AdaugaDocumentInLista(_documentNormalizat.ToString());
@@ -91,20 +96,27 @@ public class Articol
     private void TransformaArticolInCuvinte(StringBuilder continutFisier)
     {
         var listaCuvinte = ReturneazaCuvinteleNormalizate(continutFisier.ToString());
-
+        AdaugaCuvinteleInDictionar(listaCuvinte);
         DocumentGlobal.AdaugaAtributeDinArticol(listaCuvinte);
         DictionarGlobal.AdaugaCuvinteInLista(listaCuvinte);
+    }
 
-        foreach (var cuvant in listaCuvinte) AdaugaCuvantInDictionar(cuvant, DictionarCuvinte);
+    private void AdaugaCuvinteleInDictionar(List<string> listaCuvinte)
+    {
+        foreach (var cuvant in listaCuvinte)
+        {
+            AdaugaCuvantInDictionar(cuvant, DictionarCuvinte);
+        }
     }
 
     private List<string> ReturneazaCuvinteleNormalizate(string continutFisier)
     {
-        var cuvinte = continutFisier.Split().Select(cuvant =>
-                ReturneazaRadacinaCuvantului(
-                    cuvant.StergePunctuatia().ToLowerInvariant().Trim()))
-            .Where(cuvant => UtilitatiCuvinte.EsteCuvantValid(cuvant))
-            .Except(_fisierDictionarStopWords.ListaStopWords).Distinct().ToList();
+        var cuvinte = continutFisier.InlocuiestePunctuatia().ToLowerInvariant().
+            Split(' ',StringSplitOptions.TrimEntries)
+            .Where(cuvant => UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
+                             !DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvant))
+            .Select(cuvant => ReturneazaRadacinaCuvantului(cuvant)).ToList();
+
         return cuvinte;
     }
 
@@ -118,9 +130,13 @@ public class Articol
     private void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
     {
         if (dictionar.ContainsKey(cuvant))
-            dictionar[cuvant] = dictionar[cuvant] + 1;
+        {
+            dictionar[cuvant]++;
+        }
         else
+        {
             dictionar.Add(cuvant, 1);
+        }
     }
 
     public static void ScrieDateInFisiereGlobale()

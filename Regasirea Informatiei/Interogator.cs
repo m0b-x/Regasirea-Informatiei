@@ -9,7 +9,6 @@ public class Interogator
     private Dictionary<int, double> _dictionarInterogareNormalizat = new(150);
     private Interogare? _interogare;
     private readonly List<KeyValuePair<double, string>> _similaritateArticole = new(7000);
-    private readonly List<Articol> _articolez;
     private bool _esteRelevantaInterogarea;
 
     public Interogator(ref DocumentGlobal documentGlobal)
