@@ -7,38 +7,34 @@ public class DocumentGlobal
     private static readonly char[] DelimitatoriAtribute = {' ', ':'};
     private static readonly char SimbolAtribut = '@';
     private static readonly char SimbolTitlu = '#';
-    
-    private DictionarGlobal _dictionarGlobal;
-    private readonly List<string> _documenteCaSiStringuri = new List<string>(8000);
-    private Dictionary<string, Dictionary<int, int>> _documenteCaDictionare = new(8000);
+
+    private readonly List<string> _documenteCaSiStringuri = new List<string>(5000);
+    private Dictionary<string, SortedDictionary<int, int>> _documenteCaDictionare = new(5000);
     
 
     private bool _esteNevoieDeSuprascriere;
     private readonly string _numeFisier = "FisierGlobal.txt";
-    private readonly SortedSet<string> _listaAtribute = new();
-    private List<Articol> _listaArticoleNormalizate = new List<Articol>(8000);
+    private readonly HashSet<string> _listaAtribute = new(5000);
+    private HashSet<Articol> _listaArticoleNormalizate = new HashSet<Articol>(8000);
 
-    public Dictionary<string, Dictionary<int, int>> DocumenteCaSiDictionare
+    public Dictionary<string, SortedDictionary<int, int>> DocumenteCaSiDictionare
     {
         get => _documenteCaDictionare;
         set => _documenteCaDictionare = value;
     }
 
     
-    public List<Articol> ListaArticoleNormalizate
+    public HashSet<Articol> ListaArticoleNormalizate
     {
         get => _listaArticoleNormalizate;
         set => _listaArticoleNormalizate = value;
     }
 
-    public DictionarGlobal DictionarGlobal
-    {
-        get => _dictionarGlobal;
-        set => _dictionarGlobal = value;
-    }
+    public DictionarGlobal DictionarGlobal { get; set; }
+
     public DocumentGlobal(DictionarGlobal dictionarGlobal)
     {
-        _dictionarGlobal = dictionarGlobal;
+        DictionarGlobal = dictionarGlobal;
         if (File.Exists(_numeFisier))
         {
             CitesteDate();
@@ -56,27 +52,25 @@ public class DocumentGlobal
 
     private void CitesteDate()
     {
-        using (var cititor = new StreamReader(_numeFisier))
+        using var cititor = new StreamReader(_numeFisier);
+        while (!cititor.EndOfStream)
         {
-            while (!cititor.EndOfStream)
+            var linie = cititor.ReadLine() ?? throw new InvalidOperationException();
+
+
+            if (linie.StartsWith(SimbolAtribut))
             {
-                var linie = cititor.ReadLine() ?? throw new InvalidOperationException();
-
-
-                if (linie.StartsWith(SimbolAtribut))
-                {
-                    AdaugaAtributInListaLaCitire(linie.Substring(1));
-                }
-                else if (!string.IsNullOrWhiteSpace(linie))
-                {
-                    _listaArticoleNormalizate.Add(new Articol(new StringBuilder(linie)));
-                    AdaugaCuvantInDictionarLaCitire(_documenteCaDictionare, linie);
-                }
+                AdaugaAtributInListaLaCitire(linie.Substring(1));
+            }
+            else if (!string.IsNullOrWhiteSpace(linie))
+            {
+                _listaArticoleNormalizate.Add(new Articol(new StringBuilder(linie)));
+                AdaugaCuvantInDictionarLaCitire(_documenteCaDictionare, linie);
             }
         }
     }
 
-    private void AdaugaCuvantInDictionarLaCitire(Dictionary<string, Dictionary<int, int>> dictionar, string linie)
+    private void AdaugaCuvantInDictionarLaCitire(Dictionary<string, SortedDictionary<int, int>> dictionar, string linie)
     {
         var pereche =
             ConvertesteDocumentInDictionar(linie);
@@ -85,7 +79,7 @@ public class DocumentGlobal
             dictionar.Add(pereche.Key, pereche.Value);
     }
 
-    private void AdaugaCuvantDistinctInDictionar(Dictionary<string, Dictionary<int, int>> dictionar, string linie)
+    private void AdaugaCuvantDistinctInDictionar(Dictionary<string, SortedDictionary<int, int>> dictionar, string linie)
     {
         var pereche =
             ConvertesteDocumentInDictionar(linie);
@@ -105,15 +99,13 @@ public class DocumentGlobal
     {
         if (_esteNevoieDeSuprascriere)
         {
-            using (var scriitor = new StreamWriter(_numeFisier, false))
-            {
-                scriitor.AutoFlush = true;
-                foreach (var atribut in _listaAtribute) scriitor.WriteLine($"{SimbolAtribut}{atribut}");
+            using var scriitor = new StreamWriter(_numeFisier, false);
+            scriitor.AutoFlush = true;
+            foreach (var atribut in _listaAtribute) scriitor.WriteLine($"{SimbolAtribut}{atribut}");
 
-                scriitor.WriteLine("@data");
+            scriitor.WriteLine("@data");
 
-                foreach (var document in _documenteCaSiStringuri) scriitor.WriteLine(document);
-            }
+            foreach (var document in _documenteCaSiStringuri) scriitor.WriteLine(document);
         }
     }
 
@@ -126,7 +118,7 @@ public class DocumentGlobal
         }
     }
 
-    private KeyValuePair<string, Dictionary<int, int>> ConvertesteDocumentInDictionar(string document)
+    private KeyValuePair<string, SortedDictionary<int, int>> ConvertesteDocumentInDictionar(string document)
     {
         var dateDocumet = ReturneazaDateleDocumentului(document);
 
@@ -137,12 +129,12 @@ public class DocumentGlobal
         foreach (var data in dateCaString)
             dateCaNumere.Add(int.Parse(data));
 
-        Dictionary<int, int> dictionarAtribut = new(5000);
+        SortedDictionary<int, int> dictionarAtribut = new();
 
         for (var index = 0; index < dateCaNumere.Count - 1; index += 2)
             dictionarAtribut.Add(dateCaNumere[index], dateCaNumere[index + 1]);
 
-        var dictionarCaSiPereche = new KeyValuePair<string, Dictionary<int, int>>(titluDocument, dictionarAtribut);
+        var dictionarCaSiPereche = new KeyValuePair<string, SortedDictionary<int, int>>(titluDocument, dictionarAtribut);
         return dictionarCaSiPereche;
     }
 

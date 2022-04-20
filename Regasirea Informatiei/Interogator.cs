@@ -8,10 +8,10 @@ public class Interogator
     private static readonly Dictionary<string, double> DictionarIdf = new(5000);
     private static readonly Dictionary<int, int> DictionarAparitiiInDocumente = new(5000);
 
-    private readonly Dictionary<string, Dictionary<int, double>> _dictionarDocumenteNormalizate = new(7000);
-    private Dictionary<int, double> _dictionarInterogareNormalizat = new(150);
+    private readonly Dictionary<string, Dictionary<int, double>> _dictionarDocumenteNormalizate = new(5000);
+    private Dictionary<int, double> _dictionarInterogareNormalizat = new(5000);
     private Interogare? _interogare;
-    private readonly List<KeyValuePair<double, string>> _similaritateArticole = new(7000);
+    private readonly List<KeyValuePair<double, string>> _similaritateArticole = new(5000);
 
     public Interogator(ref DocumentGlobal documentGlobal)
     {
@@ -135,7 +135,7 @@ public class Interogator
 
     private void RealizeazaVectorulNormalizatDeAtribute(Articol articol)
     {
-        Dictionary<int, double> frecventeNormalizate = new(5000);
+        Dictionary<int, double> frecventeNormalizate = new();
         foreach (var cuvant in _documentGlobal.DictionarGlobal.ListaCuvinte)
         {
             if (articol.DictionarCuvinte.Keys.Contains(cuvant))

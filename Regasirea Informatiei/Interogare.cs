@@ -11,7 +11,7 @@ public class Interogare
 
     public DictionarGlobal DictionarGlobal { get; }
 
-    public Dictionary<int, int> DictionarNormalizat { get; } = new(5000);
+    public Dictionary<int, int> DictionarNormalizat { get; } = new(100);
 
     public int FrecventaMaxima = 1;
     

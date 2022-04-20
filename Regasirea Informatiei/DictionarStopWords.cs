@@ -14,7 +14,7 @@ public class DictionarStopWords
             File.Create(_numeFisier);
     }
 
-    public List<string> ListaStopWords { get; } = new(450);
+    public HashSet<string> ListaStopWords { get; } = new(450);
 
     private void CitesteDate()
     {

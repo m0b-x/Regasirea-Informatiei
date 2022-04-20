@@ -6,12 +6,12 @@ namespace Regasirea_Informatiei;
 
 public class Articol
 {
-    public static DictionarGlobal DictionarGlobal = new();
+    private static readonly DictionarGlobal DictionarGlobal = new();
     public static DocumentGlobal DocumentGlobal = new(DictionarGlobal);
 
     public string Titlu { get; private set; }
-    
-    public string NumeFisier { get; private set; }
+
+    private string NumeFisier { get; set; }
 
     public int FrecventaMaxima = 1;
 
@@ -22,7 +22,7 @@ public class Articol
 
     private readonly string _pathFisier;
 
-    private StringBuilder _documentNormalizat = new(5000);
+    private readonly StringBuilder _documentNormalizat = new(5000);
 
     public Articol(string pathFisier)
     {
@@ -34,8 +34,8 @@ public class Articol
 
     public Articol(StringBuilder documentNormalizat)
     {
-        _pathFisier = "NONE";
-        
+        _pathFisier =  "NONE";
+        NumeFisier = "NONE";
         _documentNormalizat = documentNormalizat;
         var dateDocumet = documentNormalizat.ToString().Split('#');
 
@@ -105,12 +105,12 @@ public class Articol
     private void TransformaArticolInCuvinte(StringBuilder continutFisier)
     {
         var listaCuvinte = ReturneazaCuvinteleNormalizate(continutFisier.ToString());
-        AdaugaCuvinteleInDictionar(listaCuvinte);
+        AdaugaCuvinteleDistincteInDictionar(listaCuvinte);
         DocumentGlobal.AdaugaAtributeDinArticol(listaCuvinte);
         DictionarGlobal.AdaugaCuvinteInLista(listaCuvinte);
     }
 
-    private void AdaugaCuvinteleInDictionar(List<string> listaCuvinte)
+    private void AdaugaCuvinteleDistincteInDictionar(List<string> listaCuvinte)
     {
         foreach (var cuvant in listaCuvinte)
         {
