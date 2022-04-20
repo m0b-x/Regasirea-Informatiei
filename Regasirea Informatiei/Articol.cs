@@ -10,16 +10,24 @@ public class Articol
     public static DocumentGlobal DocumentGlobal = new(DictionarGlobal);
 
     public string Titlu { get; private set; }
-    public Dictionary<string, int> DictionarCuvinte { get; } = new(30000);
+    
+    public string NumeFisier { get; private set; }
+
+    public int FrecventaMaxima = 1;
+
+    public double EntropieTotala;
+    public Dictionary<string, int> DictionarCuvinte { get; } = new(5000);
+    
     private readonly EnglishStemmer _stemmerCuvinte = new();
 
     private readonly string _pathFisier;
 
     private StringBuilder _documentNormalizat = new(5000);
 
-
     public Articol(string pathFisier)
     {
+        NumeFisier = pathFisier;
+        Titlu = string.Empty;
         _pathFisier = pathFisier;
         CitesteDate();
     }
@@ -27,7 +35,7 @@ public class Articol
     public Articol(StringBuilder documentNormalizat)
     {
         _pathFisier = "NONE";
-
+        
         _documentNormalizat = documentNormalizat;
         var dateDocumet = documentNormalizat.ToString().Split('#');
 
@@ -43,7 +51,7 @@ public class Articol
 
         for (var index = 0; index < dateCaNumere.Count - 1; index += 2)
         {
-            AdaugaCuvantInDictionar(DictionarGlobal.ListaCuvinte[dateCaNumere[index]], dateCaNumere[index + 1],
+            AdaugaCuvantDistinctInDictionar(DictionarGlobal.ListaCuvinte[dateCaNumere[index]], dateCaNumere[index + 1],
                 DictionarCuvinte);
         }
     }
@@ -75,14 +83,15 @@ public class Articol
         RealizeazaFormaVectoriala();
     }
 
-    private void AdaugaCuvantInDictionar(string cuvant, int frecventa, Dictionary<string, int> dictionar)
+    private void AdaugaCuvantDistinctInDictionar(string cuvant, int frecventa, Dictionary<string, int> dictionar)
     {
         dictionar.Add(cuvant, frecventa);
     }
 
     private void RealizeazaFormaVectoriala()
     {
-        _documentNormalizat.Append($"{Titlu}# ");
+        //aici
+        _documentNormalizat.Append($"{NumeFisier}# ");
 
         foreach (var cuvant in DictionarCuvinte)
         {
@@ -105,17 +114,35 @@ public class Articol
     {
         foreach (var cuvant in listaCuvinte)
         {
-            AdaugaCuvantInDictionar(cuvant, DictionarCuvinte);
+            AdaugaCuvantDistinctInDictionar(cuvant, DictionarCuvinte);
         }
     }
 
     private List<string> ReturneazaCuvinteleNormalizate(string continutFisier)
     {
-        var cuvinte = continutFisier.InlocuiestePunctuatia().ToLowerInvariant().
-            Split(' ',StringSplitOptions.TrimEntries)
-            .Where(cuvant => UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
-                             !DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvant))
-            .Select(cuvant => ReturneazaRadacinaCuvantului(cuvant)).ToList();
+        var cuvinte = continutFisier.InlocuiestePunctuatia().ToLowerInvariant()
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+        for (int index = 0; index < cuvinte.Count; index++)
+        {
+            if (UtilitatiCuvinte.EsteCuvantValid(cuvinte[index]))
+            {
+                if (DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvinte[index]))
+                {
+                    cuvinte.RemoveAt(index);
+                    index--;
+                }
+                else
+                {
+                    cuvinte[index] = ReturneazaRadacinaCuvantului(cuvinte[index]);
+                }
+            }
+            else
+            {
+                cuvinte.RemoveAt(index);
+                index--;
+            }
+        }
 
         return cuvinte;
     }
@@ -127,31 +154,24 @@ public class Articol
         return _stemmerCuvinte.GetCurrent();
     }
 
-    private void AdaugaCuvantInDictionar(string cuvant, Dictionary<string, int> dictionar)
+    private void AdaugaCuvantDistinctInDictionar(string cuvant, Dictionary<string, int> dictionar)
     {
         if (dictionar.ContainsKey(cuvant))
         {
             dictionar[cuvant]++;
+            if (dictionar[cuvant] > FrecventaMaxima)
+                FrecventaMaxima = dictionar[cuvant];
         }
         else
         {
             dictionar.Add(cuvant, 1);
         }
+
     }
 
     public static void ScrieDateInFisiereGlobale()
     {
         DictionarGlobal.ScrieCuvinteleInFisier();
         DocumentGlobal.ScrieDate();
-    }
-
-    public int ExtrageFrecventaMaxima()
-    {
-        var max = -1;
-        foreach (var cuvant in DictionarCuvinte)
-            if (cuvant.Value > max)
-                max = cuvant.Value;
-
-        return max;
     }
 }

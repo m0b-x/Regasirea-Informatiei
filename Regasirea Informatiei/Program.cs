@@ -17,5 +17,5 @@ Console.WriteLine($"Timp citire {cronometru.Elapsed}");
 Articol.ScrieDateInFisiereGlobale();
 //Etapa 2
 var interogator = new Interogator(ref Articol.DocumentGlobal);
-interogator.RealizeazaVectoreleNormalizateDeAtribute();
+interogator.RealizeazaVectoriiNormalizatiDeAtribute();
 interogator.InterogheazaArticole();

@@ -85,7 +85,7 @@ public class DocumentGlobal
             dictionar.Add(pereche.Key, pereche.Value);
     }
 
-    private void AdaugaCuvantInDictionar(Dictionary<string, Dictionary<int, int>> dictionar, string linie)
+    private void AdaugaCuvantDistinctInDictionar(Dictionary<string, Dictionary<int, int>> dictionar, string linie)
     {
         var pereche =
             ConvertesteDocumentInDictionar(linie);
@@ -122,7 +122,7 @@ public class DocumentGlobal
         if (!_documenteCaSiStringuri.Contains(document)) 
         {
             _listaArticoleNormalizate.Add(new Articol(new StringBuilder(document)));
-            AdaugaCuvantInDictionar(_documenteCaDictionare, document);
+            AdaugaCuvantDistinctInDictionar(_documenteCaDictionare, document);
         }
     }
 

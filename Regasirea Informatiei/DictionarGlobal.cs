@@ -5,7 +5,7 @@ public class DictionarGlobal
     public static DictionarStopWords DictionarStopWords = new ();
     public string NumeFisier { get; } = "Dictionar.txt";
 
-    public List<string> ListaCuvinte { get; } = new(30000);
+    public List<string> ListaCuvinte { get; } = new(5000);
 
     public int MarimeDictionar => ListaCuvinte.Count;
     
