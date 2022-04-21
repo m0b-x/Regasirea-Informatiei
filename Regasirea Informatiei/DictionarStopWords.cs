@@ -13,7 +13,7 @@ public class DictionarStopWords
             File.Create(_numeFisier);
     }
 
-    public HashSet<string> ListaStopWords { get; } = new(450);
+    public HashSet<string> ListaStopWords { get; } = new(Constante.NumarEstimatStopWords);
 
     private void CitesteDate()
     {

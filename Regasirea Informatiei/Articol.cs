@@ -16,13 +16,13 @@ public class Articol
     public int FrecventaMaxima = 1;
 
     public double EntropieTotala;
-    public Dictionary<string, int> DictionarCuvinte { get; } = new(5000);
+    public Dictionary<string, int> DictionarCuvinte { get; } = new(Constante.NumarCuvinteEstimatArticol);
     
     private readonly EnglishStemmer _stemmerCuvinte = new();
 
     private readonly string _pathFisier;
 
-    private readonly StringBuilder _documentNormalizat = new(5000);
+    private readonly StringBuilder _documentNormalizat = new(Constante.NumarCuvinteEstimatArticol);
 
     public Articol(string pathFisier)
     {
@@ -43,7 +43,7 @@ public class Articol
         var dateDocument = dateDocumet[1];
         var separatori = new[] {':', ' '};
         var dateCaString = dateDocument.Split(separatori, StringSplitOptions.RemoveEmptyEntries);
-        List<int> dateCaNumere = new(5000);
+        List<int> dateCaNumere = new(Constante.NumarCuvinteEstimatArticol);
         foreach (var data in dateCaString)
         {
             dateCaNumere.Add(int.Parse(data));
@@ -59,7 +59,7 @@ public class Articol
 
     private void CitesteDate()
     {
-        var continutFisier = new StringBuilder(50000);
+        var continutFisier = new StringBuilder(Constante.NumarCuvinteEstimatArticol*Constante.LungimeMedieCuvant);
         using (var cititorXml = new XmlTextReader(_pathFisier))
         {
             while (cititorXml.Read())
@@ -69,17 +69,17 @@ public class Articol
                     switch (cititorXml.Name)
                     {
                         case "p":
-                            continutFisier.Append(cititorXml.ReadElementString());
+                            continutFisier.Append(cititorXml.ReadElementContentAsString());
                             break;
                         case "title":
-                            Titlu = cititorXml.ReadElementString();
+                            Titlu = cititorXml.ReadElementContentAsString();
                             break;
                     }
                 }
             }
         }
-
-        TransformaArticolInCuvinte(continutFisier);
+        
+        RealizeazaNormalizareaArticolului(continutFisier.ToString());
         RealizeazaFormaVectoriala();
     }
 
@@ -87,12 +87,11 @@ public class Articol
     {
         dictionar.Add(cuvant, frecventa);
     }
-
     private void RealizeazaFormaVectoriala()
     {
-        //aici
         _documentNormalizat.Append($"{NumeFisier}# ");
 
+        
         foreach (var cuvant in DictionarCuvinte)
         {
             _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
@@ -102,23 +101,13 @@ public class Articol
         DocumentGlobal.AdaugaDocumentInLista(_documentNormalizat.ToString());
     }
 
-    private void TransformaArticolInCuvinte(StringBuilder continutFisier)
-    {
-        var listaCuvinte = ReturneazaCuvinteleNormalizate(continutFisier.ToString());
-        AdaugaCuvinteleDistincteInDictionar(listaCuvinte);
-    }
-
-    private void AdaugaCuvinteleDistincteInDictionar(List<string> listaCuvinte)
+    private void AdaugaCuvantInDictionar(string cuvant)
     { 
-        foreach (var cuvant in listaCuvinte)
-        {
             DictionarGlobal.AdaugaCuvantInLista(cuvant);
             DocumentGlobal.AdaugaAtributInListaDinArticol(cuvant);
             AdaugaCuvantDistinctInDictionar(cuvant, DictionarCuvinte);
-        }
     }
-
-    private List<string> ReturneazaCuvinteleNormalizate(string continutFisier)
+    private void RealizeazaNormalizareaArticolului(string continutFisier)
     {
         var cuvinte = continutFisier.InlocuiestePunctuatia().ToLowerInvariant()
             .Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -135,6 +124,7 @@ public class Articol
                 else
                 {
                     cuvinte[index] = ReturneazaRadacinaCuvantului(cuvinte[index]);
+                    AdaugaCuvantInDictionar(cuvinte[index]);
                 }
             }
             else
@@ -143,8 +133,6 @@ public class Articol
                 index--;
             }
         }
-
-        return cuvinte;
     }
 
     private string ReturneazaRadacinaCuvantului(string cuvant)

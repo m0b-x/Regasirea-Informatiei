@@ -5,13 +5,13 @@ namespace Regasirea_Informatiei;
 public class Interogator
 {
     private static DocumentGlobal _documentGlobal = null!;
-    private static readonly Dictionary<string, double> DictionarIdf = new(5000);
-    private static readonly Dictionary<int, int> DictionarAparitiiInDocumente = new(5000);
+    private static readonly Dictionary<string, double> DictionarIdf = new(Constante.NumarCuvinteEstimatArticol);
+    private static readonly Dictionary<int, int> DictionarAparitiiInDocumente = new(Constante.NumarCuvinteEstimatArticol);
 
-    private readonly Dictionary<string, Dictionary<int, double>> _dictionarDocumenteNormalizate = new(5000);
-    private Dictionary<int, double> _dictionarInterogareNormalizat = new(5000);
+    private readonly Dictionary<string, Dictionary<int, double>> _dictionarDocumenteNormalizate = new(Constante.NumarCuvinteEstimatArticol);
+    private Dictionary<int, double> _dictionarInterogareNormalizat = new(Constante.NumarCuvinteEstimatArticol);
     private Interogare? _interogare;
-    private readonly List<KeyValuePair<double, string>> _similaritateArticole = new(5000);
+    private readonly List<KeyValuePair<double, string>> _similaritateArticole = new(Constante.NumarCuvinteEstimatArticol);
 
     public Interogator(ref DocumentGlobal documentGlobal)
     {
@@ -44,7 +44,7 @@ public class Interogator
                 AfiseazaSimilaritatile();
 
                 cronometru.Stop();
-                Console.WriteLine($"\nTimp scurs:{cronometru.Elapsed}");
+                Console.WriteLine($"\nTimp interogare scurs:{cronometru.Elapsed}");
             }
             else
             {
@@ -135,7 +135,7 @@ public class Interogator
 
     private void RealizeazaVectorulNormalizatDeAtribute(Articol articol)
     {
-        Dictionary<int, double> frecventeNormalizate = new();
+        Dictionary<int, double> frecventeNormalizate = new(Constante.NumarCuvinteEstimatArticol);
         foreach (var cuvant in _documentGlobal.DictionarGlobal.ListaCuvinte)
         {
             if (articol.DictionarCuvinte.Keys.Contains(cuvant))
@@ -153,7 +153,7 @@ public class Interogator
 
     private void RealizeazaVectorulNormalizatAlInterogarii(Interogare interogare)
     {
-        Dictionary<int, double> frecventeNormalizate = new(500);
+        Dictionary<int, double> frecventeNormalizate = new(Constante.NumarCuvinteEstimatArticol);
         foreach (var cuvant in _documentGlobal.DictionarGlobal.ListaCuvinte)
         {
             if (interogare.DictionarCuvinte.ContainsKey(cuvant))

@@ -7,7 +7,7 @@ const string patternFisier = "*.xml";
 var cronometru = new Stopwatch();
 cronometru.Start();
 
-HashSet<Articol> articole = new HashSet<Articol>(32);
+HashSet<Articol> articole = new HashSet<Articol>(Constante.NumarArticoleEstimat);
 foreach (var pathFisier in Directory.EnumerateFiles(numeFolder, patternFisier))
     articole.Add(new Articol(pathFisier));
 

@@ -8,14 +8,14 @@ public class DocumentGlobal
     private static readonly char SimbolAtribut = '@';
     private static readonly char SimbolTitlu = '#';
 
-    private readonly HashSet<string> _documenteCaSiStringuri = new HashSet<string>(5000);
-    private Dictionary<string, SortedDictionary<int, int>> _documenteCaDictionare = new(5000);
+    private readonly HashSet<string> _documenteCaSiStringuri = new HashSet<string>(Constante.NumarCuvinteEstimatArticol);
+    private Dictionary<string, SortedDictionary<int, int>> _documenteCaDictionare = new(Constante.NumarCuvinteEstimatArticol);
     
 
     private bool _esteNevoieDeSuprascriere;
     private readonly string _numeFisier = "FisierGlobal.txt";
-    private readonly SortedSet<string> _listaAtribute = new();
-    private HashSet<Articol> _listaArticoleNormalizate = new HashSet<Articol>(8000);
+    private readonly HashSet<string> _listaAtribute = new();
+    private HashSet<Articol> _listaArticoleNormalizate = new HashSet<Articol>(Constante.NumarArticoleEstimat);
 
     public Dictionary<string, SortedDictionary<int, int>> DocumenteCaSiDictionare
     {
@@ -101,7 +101,8 @@ public class DocumentGlobal
         {
             using var scriitor = new StreamWriter(_numeFisier, false);
             scriitor.AutoFlush = true;
-            foreach (var atribut in _listaAtribute) scriitor.WriteLine($"{SimbolAtribut}{atribut}");
+            SortedSet<string> listaAtributeSortate = new(_listaAtribute);
+            foreach (var atribut in listaAtributeSortate) scriitor.WriteLine($"{SimbolAtribut}{atribut}");
 
             scriitor.WriteLine("@data");
 
@@ -125,7 +126,7 @@ public class DocumentGlobal
         var titluDocument = dateDocumet[0];
         var dateDocument = dateDocumet[1];
         var dateCaString = dateDocument.Split(DelimitatoriAtribute, StringSplitOptions.RemoveEmptyEntries);
-        List<int> dateCaNumere = new(5000);
+        List<int> dateCaNumere = new(Constante.NumarCuvinteEstimatArticol);
         foreach (var data in dateCaString)
             dateCaNumere.Add(int.Parse(data));
 

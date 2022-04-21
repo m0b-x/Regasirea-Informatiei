@@ -5,7 +5,7 @@ public class DictionarGlobal
     public static DictionarStopWords DictionarStopWords = new ();
     public string NumeFisier { get; } = "Dictionar.txt";
 
-    public List<string> ListaCuvinte { get; } = new(5000);
+    public List<string> ListaCuvinte { get; } = new(Constante.NumarCuvinteEstimatDictionar);
 
     public int MarimeDictionar => ListaCuvinte.Count;
     
@@ -26,24 +26,20 @@ public class DictionarGlobal
 
     private void CitesteCuvinte()
     {
-        using (var cititorCuvinte = new StreamReader(NumeFisier))
-        {
-            var cuvinte = cititorCuvinte.ReadToEnd().
-                Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        using var cititorCuvinte = new StreamReader(NumeFisier);
+        var cuvinte = cititorCuvinte.ReadToEnd().
+            Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (var cuvant in cuvinte) ListaCuvinte.Add(cuvant);
-        }
+        foreach (var cuvant in cuvinte) ListaCuvinte.Add(cuvant);
     }
 
     public void ScrieCuvinteleInFisier()
     {
         if (_esteNevoieDeSupraScriere)
         {
-            using (var scriitorCuvinte = new StreamWriter(NumeFisier, false))
-            {
-                scriitorCuvinte.AutoFlush = true;
-                foreach (var cuvant in ListaCuvinte) scriitorCuvinte.Write($"{cuvant} ");
-            }
+            using var scriitorCuvinte = new StreamWriter(NumeFisier, false);
+            scriitorCuvinte.AutoFlush = true;
+            foreach (var cuvant in ListaCuvinte) scriitorCuvinte.Write($"{cuvant} ");
         }
     }
 

@@ -7,11 +7,11 @@ public class Interogare
 
     public string StringInterogare { get; }
 
-    public Dictionary<string, int> DictionarCuvinte { get; } = new(5000);
+    public Dictionary<string, int> DictionarCuvinte { get; } = new(Constante.NumarCuvinteEstimatArticol);
 
     public DictionarGlobal DictionarGlobal { get; }
 
-    public Dictionary<int, int> DictionarNormalizat { get; } = new(100);
+    public Dictionary<int, int> DictionarNormalizat { get; } = new(Constante.NumarEstimatCuvinteInterogare);
 
     public int FrecventaMaxima = 1;
     
