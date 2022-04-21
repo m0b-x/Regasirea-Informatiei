@@ -7,16 +7,17 @@ const string patternFisier = "*.xml";
 var cronometru = new Stopwatch();
 cronometru.Start();
 
-HashSet<Articol> articole = new HashSet<Articol>(Constante.NumarArticoleEstimat);
+HashSet<Document> documente = new HashSet<Document>(Constante.NumarDocumenteEstimat,Document.PathFisierComparer);
 foreach (var pathFisier in Directory.EnumerateFiles(numeFolder, patternFisier))
-    articole.Add(new Articol(pathFisier));
-
+{
+    Document document = new Document(pathFisier);
+    documente.Add(document);
+}
 
 cronometru.Stop();
 Console.WriteLine($"Timp citire {cronometru.Elapsed}");
-Articol.ScrieDateInFisiereGlobale();
+Document.ScrieDateInFisiereGlobale();
 
 //Etapa 2
-var interogator = new Interogator(ref Articol.DocumentGlobal);
-interogator.RealizeazaVectoriiNormalizatiDeAtribute();
-interogator.InterogheazaArticole();
+var interogator = new Interogator(ref Document.DocumentGlobal);
+interogator.InterogheazaDocumente();

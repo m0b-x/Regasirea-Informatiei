@@ -5,13 +5,14 @@ namespace Regasirea_Informatiei;
 public class Interogator
 {
     private static DocumentGlobal _documentGlobal = null!;
-    private static readonly Dictionary<string, double> DictionarIdf = new(Constante.NumarCuvinteEstimatArticol);
-    private static readonly Dictionary<int, int> DictionarAparitiiInDocumente = new(Constante.NumarCuvinteEstimatArticol);
+    private static readonly Dictionary<string, double> DictionarIdf = new(Constante.NumarCuvinteUniceEstimat);
+    private static readonly Dictionary<string, double> DictionarFrecventaNomnialaAtricole = new(Constante.NumarCuvinteUniceEstimat);
+    private static readonly Dictionary<int, int> DictionarAparitiiInDocumente = new(Constante.NumarCuvinteUniceEstimat);
 
-    private readonly Dictionary<string, Dictionary<int, double>> _dictionarDocumenteNormalizate = new(Constante.NumarCuvinteEstimatArticol);
-    private Dictionary<int, double> _dictionarInterogareNormalizat = new(Constante.NumarCuvinteEstimatArticol);
+    private readonly Dictionary<string, Dictionary<int, double>> _dictionarDocumenteNormalizate = new(Constante.NumarDocumenteEstimat);
+    private Dictionary<int, double> _dictionarInterogareNormalizat = new(Constante.NumarEstimatCuvinteInterogare);
     private Interogare? _interogare;
-    private readonly List<KeyValuePair<double, string>> _similaritateArticole = new(Constante.NumarCuvinteEstimatArticol);
+    private readonly List<KeyValuePair<double, string>> _similaritateDocumente = new(Constante.NumarCuvinteEstimatDocument);
 
     public Interogator(ref DocumentGlobal documentGlobal)
     {
@@ -20,7 +21,7 @@ public class Interogator
 
     private string? PropozitieInterogare { get; set; }
 
-    public void InterogheazaArticole()
+    public void InterogheazaDocumente()
     {
         Console.Write("Definiti o interogare: ");
         PropozitieInterogare = Console.ReadLine() ?? throw new InvalidOperationException();
@@ -40,7 +41,7 @@ public class Interogator
             {
                 RealizeazaVectorulNormalizatAlInterogarii(_interogare);
                 RealizeazaVectoriiNormalizatiDeAtribute();
-                CalculeazaSimilaritateaArticolelor();
+                CalculeazaSimilaritateaDocumentelor();
                 AfiseazaSimilaritatile();
 
                 cronometru.Stop();
@@ -48,36 +49,36 @@ public class Interogator
             }
             else
             {
-                Console.WriteLine("Nu a fost gasit nimic,scuze.");
+                Console.WriteLine("Nu a fost gasit nimic,scuze.(interogare irelevanta)");
             }
         }
     }
 
     private void AfiseazaSimilaritatile()
     {
-        if (_similaritateArticole.Count > 0)
+        if (_similaritateDocumente.Count > 0)
         {
-            _similaritateArticole.Sort((x, y) => y.Key.CompareTo(x.Key));
+            _similaritateDocumente.Sort((x, y) => y.Key.CompareTo(x.Key));
 
-            Console.WriteLine("Articole gasite:");
+            Console.WriteLine("Documente gasite:");
 
-            foreach (var articoleSortate in _similaritateArticole)
-                Console.WriteLine($"{articoleSortate.Value} - {articoleSortate.Key}");
+            foreach (var documenteSortate in _similaritateDocumente)
+                Console.WriteLine($"{documenteSortate.Value} - {documenteSortate.Key}");
         }
         else
         {
-            Console.WriteLine("Nu a fost gasit nimic,scuze.");
+            Console.WriteLine("Nu a fost gasit nimic,scuze.(0 documente similare)");
         }
     }
 
-    private void CalculeazaSimilaritateaArticolelor()
+    private void CalculeazaSimilaritateaDocumentelor()
     {
         foreach (var document in _dictionarDocumenteNormalizate)
         {
             var similaritate = CalculeazaSimilariteateaCuInterogarea(_dictionarInterogareNormalizat,
                 document.Value);
             if (similaritate > 0)
-                _similaritateArticole.Add(new KeyValuePair<double, string>(similaritate, document.Key));
+                _similaritateDocumente.Add(new KeyValuePair<double, string>(similaritate, document.Key));
         }
     }
 
@@ -87,13 +88,13 @@ public class Interogator
         {
             foreach (var cuvant in _interogare.DictionarCuvinte.Keys)
             {
+
                 if (_documentGlobal.DictionarGlobal.ListaCuvinte.Contains(cuvant))
                 {
                     return true;
                 }
             }
         }
-
         return false;
     }
 
@@ -129,52 +130,39 @@ public class Interogator
 
     public void RealizeazaVectoriiNormalizatiDeAtribute()
     {
-        foreach (var articol in _documentGlobal.ListaArticoleNormalizate)
-            RealizeazaVectorulNormalizatDeAtribute(articol);
-    }
-
-    private void RealizeazaVectorulNormalizatDeAtribute(Articol articol)
-    {
-        Dictionary<int, double> frecventeNormalizate = new(Constante.NumarCuvinteEstimatArticol);
-        foreach (var cuvant in _documentGlobal.DictionarGlobal.ListaCuvinte)
+        foreach (var document in _documentGlobal.ListaDocumenteNormalizate)
         {
-            if (articol.DictionarCuvinte.Keys.Contains(cuvant))
+            Dictionary<int, double> frecventeNormalizate = new(Constante.NumarCuvinteEstimatDocument);
+        
+            foreach (var cuvant in document.DictionarCuvinte)
             {
-                var indexCuvant = _documentGlobal.DictionarGlobal.ListaCuvinte.IndexOf(cuvant);
+                var indexCuvant = _documentGlobal.DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key);
                 var frecventaCuvantuluiNormalizata =
-                    CalculeazaFrecventaCuvantuluiInArticol(_documentGlobal.DictionarGlobal.ListaCuvinte[indexCuvant],
-                        articol);
+                    CalculeazaFrecventaCuvantuluiInDocument(_documentGlobal.DictionarGlobal.ListaCuvinte[indexCuvant],
+                        document);
                 frecventeNormalizate.Add(indexCuvant, frecventaCuvantuluiNormalizata);
             }
+            _dictionarDocumenteNormalizate.Add(document.PathFisier, frecventeNormalizate);
         }
-
-        AdaugaCuvantDistinctInDictionar(_dictionarDocumenteNormalizate, new(articol.Titlu, frecventeNormalizate));
     }
 
     private void RealizeazaVectorulNormalizatAlInterogarii(Interogare interogare)
     {
-        Dictionary<int, double> frecventeNormalizate = new(Constante.NumarCuvinteEstimatArticol);
-        foreach (var cuvant in _documentGlobal.DictionarGlobal.ListaCuvinte)
+        Dictionary<int, double> frecventeNormalizate = new(Constante.NumarCuvinteEstimatDocument);
+        foreach (var cuvant in interogare.DictionarCuvinte)
         {
-            if (interogare.DictionarCuvinte.ContainsKey(cuvant))
+            if (_documentGlobal.DictionarGlobal.ListaCuvinte.Contains(cuvant.Key))
             {
-                var indexCuvant = _documentGlobal.DictionarGlobal.ListaCuvinte.IndexOf(cuvant);
                 var frecventaCuvantuluiNormalizata =
-                    CalculeazaFrecventaCuvantuluiInInterogare(_documentGlobal.DictionarGlobal.ListaCuvinte[indexCuvant],
+                    CalculeazaFrecventaCuvantuluiInInterogare(cuvant.Key,
                         interogare);
-                frecventeNormalizate.Add(indexCuvant, frecventaCuvantuluiNormalizata);
+                frecventeNormalizate.Add(_documentGlobal.DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key), 
+                    frecventaCuvantuluiNormalizata);
             }
         }
 
         _dictionarInterogareNormalizat = frecventeNormalizate;
     }
-
-    private void AdaugaCuvantDistinctInDictionar(Dictionary<string, Dictionary<int, double>> dictionar,
-        KeyValuePair<string, Dictionary<int, double>> pereche)
-    {
-        if (!dictionar.ContainsKey(pereche.Key)) dictionar.Add(pereche.Key, pereche.Value);
-    }
-
     private double CalculeazaIdf(string atribut)
     {
         if (!DictionarIdf.ContainsKey(atribut))
@@ -184,20 +172,25 @@ public class Interogator
             {
                 var nrTotalDocumente = _documentGlobal.DocumenteCaSiDictionare.Count;
                 var idf = Math.Log((double) nrTotalDocumente / nrDocumenteContinandAtributul);
+                
                 DictionarIdf.Add(atribut, idf);
                 return idf;
             }
-
-            DictionarIdf.Add(atribut, 0);
-            return 0;
+            else
+            {
+                DictionarIdf.Add(atribut, 0);
+                return 0;
+            }
         }
-
-        return DictionarIdf[atribut];
+        else
+        {
+            return DictionarIdf[atribut];
+        }
     }
 
-    private double CalculeazaFrecventaCuvantuluiInArticol(string atribut, Articol articol)
+    private double CalculeazaFrecventaCuvantuluiInDocument(string atribut, Document document)
     {
-        return CalculeazaIdf(atribut) * CalculeazaNormalizareaNominala(articol, atribut);
+            return CalculeazaIdf(atribut) * CalculeazaNormalizareaNominala(document, atribut);
     }
 
     private double CalculeazaFrecventaCuvantuluiInInterogare(string atribut, Interogare interogare)
@@ -227,26 +220,45 @@ public class Interogator
     {
         if (_documentGlobal.DictionarGlobal.ListaCuvinte.Contains(atribut))
         {
-            var aparitiiArticol = interogare.DictionarCuvinte[atribut];
-            return (double) aparitiiArticol / interogare.FrecventaMaxima > 0 ? interogare.FrecventaMaxima : 1;
+            var aparitiiDocument = interogare.DictionarCuvinte[atribut];
+            return (double) aparitiiDocument / interogare.FrecventaMaxima > 0 ? interogare.FrecventaMaxima : 1;
+            
         }
-
-        return 0;
-    }
-
-    private double CalculeazaNormalizareaNominala(Articol articol, string atribut)
-    {
-        if (_documentGlobal.DictionarGlobal.ListaCuvinte.Contains(atribut))
+        else
         {
-            if (articol.DictionarCuvinte.ContainsKey(atribut))
-            {
-                var aparitiiArticol = articol.DictionarCuvinte[atribut];
-                return (double) aparitiiArticol / articol.FrecventaMaxima > 0 ? articol.FrecventaMaxima : 1;
-            }
-
             return 0;
         }
+    }
 
-        return 0;
+    private double CalculeazaNormalizareaNominala(Document document, string atribut)
+    {
+        if (!DictionarFrecventaNomnialaAtricole.ContainsKey(atribut))
+        {
+            if (_documentGlobal.DictionarGlobal.ListaCuvinte.Contains(atribut))
+            {
+                if (document.DictionarCuvinte.ContainsKey(atribut))
+                {
+                    var aparitiiDocument = document.DictionarCuvinte[atribut];
+                    double normalizareNominala =  aparitiiDocument / document.FrecventaMaxima > 0 ? document.FrecventaMaxima: 1;
+                    DictionarFrecventaNomnialaAtricole.Add(atribut,normalizareNominala);
+                    return normalizareNominala;
+                }
+                else
+                {
+                    DictionarFrecventaNomnialaAtricole.Add(atribut, 0);
+                    return 0;
+                }
+            }
+            else
+            {
+                
+                DictionarFrecventaNomnialaAtricole.Add(atribut, 0);
+                return 0;
+            }
+        }
+        else
+        {
+            return DictionarFrecventaNomnialaAtricole[atribut];
+        }
     }
 }

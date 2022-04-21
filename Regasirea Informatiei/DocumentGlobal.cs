@@ -4,18 +4,15 @@ namespace Regasirea_Informatiei;
 
 public class DocumentGlobal
 {
-    private static readonly char[] DelimitatoriAtribute = {' ', ':'};
-    private static readonly char SimbolAtribut = '@';
-    private static readonly char SimbolTitlu = '#';
 
-    private readonly HashSet<string> _documenteCaSiStringuri = new HashSet<string>(Constante.NumarCuvinteEstimatArticol);
-    private Dictionary<string, SortedDictionary<int, int>> _documenteCaDictionare = new(Constante.NumarCuvinteEstimatArticol);
+    private readonly HashSet<string> _documenteCaSiStringuri = new HashSet<string>(Constante.NumarCuvinteEstimatDocument);
+    private Dictionary<string, SortedDictionary<int, int>> _documenteCaDictionare = new(Constante.NumarCuvinteEstimatDocument);
     
 
     private bool _esteNevoieDeSuprascriere;
     private readonly string _numeFisier = "FisierGlobal.txt";
     private readonly HashSet<string> _listaAtribute = new();
-    private HashSet<Articol> _listaArticoleNormalizate = new HashSet<Articol>(Constante.NumarArticoleEstimat);
+    private HashSet<Document> _listaDocumenteNormalizate = new HashSet<Document>(Constante.NumarDocumenteEstimat,Document.PathFisierComparer);
 
     public Dictionary<string, SortedDictionary<int, int>> DocumenteCaSiDictionare
     {
@@ -24,10 +21,10 @@ public class DocumentGlobal
     }
 
     
-    public HashSet<Articol> ListaArticoleNormalizate
+    public HashSet<Document> ListaDocumenteNormalizate
     {
-        get => _listaArticoleNormalizate;
-        set => _listaArticoleNormalizate = value;
+        get => _listaDocumenteNormalizate;
+        set => _listaDocumenteNormalizate = value;
     }
 
     public DictionarGlobal DictionarGlobal { get; set; }
@@ -58,13 +55,13 @@ public class DocumentGlobal
             var linie = cititor.ReadLine() ?? throw new InvalidOperationException();
 
 
-            if (linie.StartsWith(SimbolAtribut))
+            if (linie.StartsWith(Constante.SimbolAtribut))
             {
                 AdaugaAtributInListaLaCitire(linie.Substring(1));
             }
             else if (!string.IsNullOrWhiteSpace(linie))
             {
-                _listaArticoleNormalizate.Add(new Articol(new StringBuilder(linie)));
+                _listaDocumenteNormalizate.Add(new Document(new StringBuilder(linie)));
                 AdaugaCuvantInDictionarLaCitire(_documenteCaDictionare, linie);
             }
         }
@@ -102,7 +99,7 @@ public class DocumentGlobal
             using var scriitor = new StreamWriter(_numeFisier, false);
             scriitor.AutoFlush = true;
             SortedSet<string> listaAtributeSortate = new(_listaAtribute);
-            foreach (var atribut in listaAtributeSortate) scriitor.WriteLine($"{SimbolAtribut}{atribut}");
+            foreach (var atribut in listaAtributeSortate) scriitor.WriteLine($"{Constante.SimbolAtribut}{atribut}");
 
             scriitor.WriteLine("@data");
 
@@ -114,7 +111,7 @@ public class DocumentGlobal
     {
         if (!_documenteCaSiStringuri.Contains(document)) 
         {
-            _listaArticoleNormalizate.Add(new Articol(new StringBuilder(document)));
+            _listaDocumenteNormalizate.Add(new Document(new StringBuilder(document)));
             AdaugaCuvantDistinctInDictionar(_documenteCaDictionare, document);
         }
     }
@@ -125,8 +122,8 @@ public class DocumentGlobal
 
         var titluDocument = dateDocumet[0];
         var dateDocument = dateDocumet[1];
-        var dateCaString = dateDocument.Split(DelimitatoriAtribute, StringSplitOptions.RemoveEmptyEntries);
-        List<int> dateCaNumere = new(Constante.NumarCuvinteEstimatArticol);
+        var dateCaString = dateDocument.Split(Constante.DelimitatorIndexFrecventa, StringSplitOptions.RemoveEmptyEntries);
+        List<int> dateCaNumere = new(Constante.NumarCuvinteEstimatDocument);
         foreach (var data in dateCaString)
             dateCaNumere.Add(int.Parse(data));
 
@@ -141,7 +138,7 @@ public class DocumentGlobal
 
     private string[] ReturneazaDateleDocumentului(string document)
     {
-        return document.Split(SimbolTitlu);
+        return document.Split(Constante.SimbolTitlu);
     }
 
     private void AdaugaAtributInListaLaCitire(string atribut)
@@ -149,7 +146,7 @@ public class DocumentGlobal
         _listaAtribute.Add(atribut);
     }
 
-    public void AdaugaAtributInListaDinArticol(string atribut)
+    public void AdaugaAtributInListaDinDocument(string atribut)
     {
         if (!_listaAtribute.Contains(atribut))
         {
@@ -162,11 +159,11 @@ public class DocumentGlobal
         }
     }
 
-    public void AdaugaAtributeDinArticol(IEnumerable<string> atribute)
+    public void AdaugaAtributeDinDocument(IEnumerable<string> atribute)
     {
         foreach (var atribut in atribute)
         {
-            AdaugaAtributInListaDinArticol(atribut);
+            AdaugaAtributInListaDinDocument(atribut);
         }
     }
 }

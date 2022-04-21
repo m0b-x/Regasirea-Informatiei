@@ -23,7 +23,7 @@ public static class UtilitatiCuvinte
             if (!char.IsPunctuation(c))
                 cuvantFaraPunctuatie.Append(c);
             else
-                cuvantFaraPunctuatie.Append(' ');
+                cuvantFaraPunctuatie.Append(Constante.DelimitatorGeneral);
         return cuvantFaraPunctuatie.ToString();
     }
 

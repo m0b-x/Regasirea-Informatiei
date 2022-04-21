@@ -28,7 +28,7 @@ public class DictionarGlobal
     {
         using var cititorCuvinte = new StreamReader(NumeFisier);
         var cuvinte = cititorCuvinte.ReadToEnd().
-            Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            Split(Constante.DelimitatorGeneral, StringSplitOptions.RemoveEmptyEntries);
 
         foreach (var cuvant in cuvinte) ListaCuvinte.Add(cuvant);
     }

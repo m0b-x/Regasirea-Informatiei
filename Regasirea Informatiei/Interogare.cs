@@ -1,13 +1,13 @@
 namespace Regasirea_Informatiei;
-using SF.Snowball.Ext;
 
+using Accord.MachineLearning.Text.Stemmers;
 public class Interogare
 {
-    private readonly EnglishStemmer _stemmerCuvinte = new();
+    private static readonly EnglishStemmer StemmerCuvinte = new();
 
     public string StringInterogare { get; }
 
-    public Dictionary<string, int> DictionarCuvinte { get; } = new(Constante.NumarCuvinteEstimatArticol);
+    public Dictionary<string, int> DictionarCuvinte { get; } = new(Constante.NumarCuvinteEstimatDocument);
 
     public DictionarGlobal DictionarGlobal { get; }
 
@@ -44,7 +44,7 @@ public class Interogare
     private List<string> ReturneazaCuvinteleNormalizate(string continutFisier)
     {
         var cuvinte = continutFisier.InlocuiestePunctuatia().ToLowerInvariant().
-            Split(' ')
+            Split(Constante.DelimitatorGeneral)
             .Where(cuvant => UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
                              !DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvant))
             .Select(cuvant => ReturneazaRadacinaCuvantului(cuvant));
@@ -54,9 +54,7 @@ public class Interogare
 
     private string ReturneazaRadacinaCuvantului(string cuvant)
     {
-        _stemmerCuvinte.SetCurrent(cuvant);
-        _stemmerCuvinte.Stem();
-        return _stemmerCuvinte.GetCurrent();
+        return StemmerCuvinte.Stem(cuvant);
     }
 
     private void AdaugaCuvantInDictionarNormalizat(int cuvantIndex, Dictionary<int, int> dictionar)
@@ -76,6 +74,9 @@ public class Interogare
                 FrecventaMaxima = DictionarCuvinte[cuvant];
         }
         else
+        {
             DictionarCuvinte.Add(cuvant, 1);
+        }
+        
     }
 }
