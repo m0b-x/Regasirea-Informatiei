@@ -106,14 +106,14 @@ public class Articol
     {
         var listaCuvinte = ReturneazaCuvinteleNormalizate(continutFisier.ToString());
         AdaugaCuvinteleDistincteInDictionar(listaCuvinte);
-        DocumentGlobal.AdaugaAtributeDinArticol(listaCuvinte);
-        DictionarGlobal.AdaugaCuvinteInLista(listaCuvinte);
     }
 
     private void AdaugaCuvinteleDistincteInDictionar(List<string> listaCuvinte)
-    {
+    { 
         foreach (var cuvant in listaCuvinte)
         {
+            DictionarGlobal.AdaugaCuvantInLista(cuvant);
+            DocumentGlobal.AdaugaAtributInListaDinArticol(cuvant);
             AdaugaCuvantDistinctInDictionar(cuvant, DictionarCuvinte);
         }
     }

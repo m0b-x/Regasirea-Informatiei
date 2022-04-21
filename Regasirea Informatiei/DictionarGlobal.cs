@@ -54,7 +54,7 @@ public class DictionarGlobal
         ListaCuvinte.Sort();
     }
 
-    private void AdaugaCuvantInLista(string cuvant)
+    public void AdaugaCuvantInLista(string cuvant)
     {
         if (!ListaCuvinte.Contains(cuvant))
         {

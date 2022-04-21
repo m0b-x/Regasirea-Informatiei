@@ -8,13 +8,13 @@ public class DocumentGlobal
     private static readonly char SimbolAtribut = '@';
     private static readonly char SimbolTitlu = '#';
 
-    private readonly List<string> _documenteCaSiStringuri = new List<string>(5000);
+    private readonly HashSet<string> _documenteCaSiStringuri = new HashSet<string>(5000);
     private Dictionary<string, SortedDictionary<int, int>> _documenteCaDictionare = new(5000);
     
 
     private bool _esteNevoieDeSuprascriere;
     private readonly string _numeFisier = "FisierGlobal.txt";
-    private readonly HashSet<string> _listaAtribute = new(5000);
+    private readonly SortedSet<string> _listaAtribute = new();
     private HashSet<Articol> _listaArticoleNormalizate = new HashSet<Articol>(8000);
 
     public Dictionary<string, SortedDictionary<int, int>> DocumenteCaSiDictionare
@@ -148,7 +148,7 @@ public class DocumentGlobal
         _listaAtribute.Add(atribut);
     }
 
-    private void AdaugaAtributInListaDinArticol(string atribut)
+    public void AdaugaAtributInListaDinArticol(string atribut)
     {
         if (!_listaAtribute.Contains(atribut))
         {
