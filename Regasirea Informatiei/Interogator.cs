@@ -7,12 +7,8 @@ public class Interogator
     private readonly DocumentGlobal _documentGlobal;
     private readonly Dictionary<string, double> _dictionarIdf = new(Constante.NumarCuvinteUniceEstimat);
 
-    private readonly Dictionary<string, double> _dictionarFrecventaNomnialaAtricole =
-        new(Constante.NumarCuvinteUniceEstimat);
-
     private readonly Dictionary<int, int> _dictionarAparitiiInDocumente = new(Constante.NumarCuvinteUniceEstimat);
 
-    
     private readonly Dictionary<string, Dictionary<int, double>> _dictionarDocumenteNormalizate =
         new(Constante.NumarDocumenteEstimat);
 
@@ -191,6 +187,7 @@ public class Interogator
     private double CalculeazaFrecventaCuvantuluiInDocument(string atribut,
         Document document)
     {
+        
         return CalculeazaIdf(atribut) *
                CalculeazaNormalizareaNominala(document,
                    atribut);
@@ -244,8 +241,6 @@ public class Interogator
     private double CalculeazaNormalizareaNominala(Document document,
         string atribut)
     {
-        if (!_dictionarFrecventaNomnialaAtricole.ContainsKey(atribut))
-        {
             if (document.DictionarCuvinte.ContainsKey(atribut))
             {
                 var aparitiiDocument = document.DictionarCuvinte[atribut];
@@ -253,18 +248,11 @@ public class Interogator
                     aparitiiDocument / document.FrecventaMaxima > 0
                         ? document.FrecventaMaxima
                         : 1;
-                _dictionarFrecventaNomnialaAtricole.Add(atribut,normalizareNominala);
                 return normalizareNominala;
             }
             else
             {
-                _dictionarFrecventaNomnialaAtricole.Add(atribut, 0);
                 return 0;
             }
-        }
-        else
-        {
-            return _dictionarFrecventaNomnialaAtricole[atribut];
-        }
     }
 }

@@ -48,9 +48,8 @@ public class Document
     {
         PathFisier = pathFisier;
         Titlu = string.Empty;
-        if (DocumentGlobal.ListaDocumenteNormalizate.Contains(this))
+        if (DocumentGlobal.ListaDocumenteNormalizate.TryGetValue(this,out var documentGasit) == true)
         {
-            DocumentGlobal.ListaDocumenteNormalizate.TryGetValue(this,out var documentGasit);
             FrecventaMaxima = documentGasit!.FrecventaMaxima;
             DictionarCuvinte = documentGasit.DictionarCuvinte;
             DocumentNormalizat = documentGasit.DocumentNormalizat;
@@ -173,21 +172,10 @@ public class Document
         {
             if (UtilitatiCuvinte.EsteCuvantValid(cuvinte[index]))
             {
-                if (DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvinte[index]))
+                if (!DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvinte[index]))
                 {
-                    cuvinte.RemoveAt(index);
-                    index--;
+                    AdaugaCuvantInDictionar(ReturneazaRadacinaCuvantului(cuvinte[index]));
                 }
-                else
-                {
-                    cuvinte[index] = ReturneazaRadacinaCuvantului(cuvinte[index]);
-                    AdaugaCuvantInDictionar(cuvinte[index]);
-                }
-            }
-            else
-            {
-                cuvinte.RemoveAt(index);
-                index--;
             }
         }
     }

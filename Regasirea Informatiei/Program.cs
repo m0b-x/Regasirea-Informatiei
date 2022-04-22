@@ -10,8 +10,8 @@ cronometru.Start();
 HashSet<Document> documente = new HashSet<Document>(Constante.NumarDocumenteEstimat,Document.PathFisierComparer);
 foreach (var pathFisier in Directory.EnumerateFiles(numeFolder, patternFisier))
 {
-    Document document = new Document(pathFisier);
-    documente.Add(document);
+        Document document = new Document(pathFisier);
+        documente.Add(document);
 }
 
 cronometru.Stop();

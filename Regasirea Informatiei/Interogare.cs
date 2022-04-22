@@ -32,26 +32,22 @@ public class Interogare
 
     private void TransformaInterogareInCuvinte(string continutiterogare)
     {
-        var cuvinte = ReturneazaCuvinteleNormalizate(continutiterogare);
+        var cuvinte = continutiterogare.InlocuiestePunctuatia().ToLowerInvariant()
+            .Split(Constante.DelimitatorGeneral, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-        foreach (var cuvant in cuvinte)
+        for (int index = 0; index < cuvinte.Count; index++)
         {
-            AdaugaCuvantInDictionarNormalizat(DictionarGlobal.ListaCuvinte.IndexOf(cuvant), DictionarNormalizat);
-            AdaugaCuvantDistinctInDictionar(cuvant, DictionarCuvinte);
+            if (UtilitatiCuvinte.EsteCuvantValid(cuvinte[index]))
+            {
+                if (!DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvinte[index]))
+                {
+                    string cuvant = ReturneazaRadacinaCuvantului(cuvinte[index]);
+                    AdaugaCuvantInDictionarNormalizat(DictionarGlobal.ListaCuvinte.IndexOf(cuvant), DictionarNormalizat);
+                    AdaugaCuvantDistinctInDictionar(cuvant, DictionarCuvinte);
+                }
+            }
         }
     }
-
-    private List<string> ReturneazaCuvinteleNormalizate(string continutFisier)
-    {
-        var cuvinte = continutFisier.InlocuiestePunctuatia().ToLowerInvariant().
-            Split(Constante.DelimitatorGeneral)
-            .Where(cuvant => UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
-                             !DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvant))
-            .Select(ReturneazaRadacinaCuvantului);
-
-        return cuvinte.ToList();
-    }
-
     private string ReturneazaRadacinaCuvantului(string cuvant)
     {
         return _stemmerCuvinte.Stem(cuvant);
