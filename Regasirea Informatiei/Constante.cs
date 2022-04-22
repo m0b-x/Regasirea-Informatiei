@@ -13,12 +13,13 @@ public static class Constante
     public const char SimbolAtribut = '@';
     public const char SimbolTitlu = '#';
     public const char DelimitatorGeneral = ' ';
+    public const string InlocuitorPunctuatie = " ";
     public const char DelimitatorTopicuri = '_';
     public const char DelimitatorClase = '#';
     public const char DelimitatorClaseCitire = ':';
-    public const string inceputParagraf = "<p>";
-    public const string sfarsitParagraf = "<p>";
-    public const string inlocuitorParagrf = " ";
+    public const string InceputParagraf = "<p>";
+    public const string SfarsitParagraf = "<p>";
+    public const string InlocuitorParagrf = " ";
     public static readonly char[] DelimitatorIndexFrecventa = new []{' ', ':'};
     
     

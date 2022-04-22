@@ -3,15 +3,15 @@ namespace Regasirea_Informatiei;
 using Accord.MachineLearning.Text.Stemmers;
 public class Interogare
 {
-    private static readonly EnglishStemmer StemmerCuvinte = new();
+    private readonly EnglishStemmer _stemmerCuvinte = new();
 
-    public string StringInterogare { get; }
+    private string StringInterogare { get; }
 
     public Dictionary<string, int> DictionarCuvinte { get; } = new(Constante.NumarCuvinteEstimatDocument);
 
-    public DictionarGlobal DictionarGlobal { get; }
+    private DictionarGlobal DictionarGlobal { get; }
 
-    public Dictionary<int, int> DictionarNormalizat { get; } = new(Constante.NumarEstimatCuvinteInterogare);
+    private Dictionary<int, int> DictionarNormalizat { get; } = new(Constante.NumarEstimatCuvinteInterogare);
 
     public int FrecventaMaxima = 1;
     
@@ -47,14 +47,14 @@ public class Interogare
             Split(Constante.DelimitatorGeneral)
             .Where(cuvant => UtilitatiCuvinte.EsteCuvantValid(cuvant) &&
                              !DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvant))
-            .Select(cuvant => ReturneazaRadacinaCuvantului(cuvant));
+            .Select(ReturneazaRadacinaCuvantului);
 
         return cuvinte.ToList();
     }
 
     private string ReturneazaRadacinaCuvantului(string cuvant)
     {
-        return StemmerCuvinte.Stem(cuvant);
+        return _stemmerCuvinte.Stem(cuvant);
     }
 
     private void AdaugaCuvantInDictionarNormalizat(int cuvantIndex, Dictionary<int, int> dictionar)

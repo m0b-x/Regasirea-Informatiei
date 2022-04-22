@@ -2,7 +2,7 @@ namespace Regasirea_Informatiei;
 
 public class DictionarGlobal
 {
-    public static DictionarStopWords DictionarStopWords = new ();
+    public DictionarStopWords DictionarStopWords = new ();
     public string NumeFisier { get; } = "Dictionar.txt";
 
     public List<string> ListaCuvinte { get; } = new(Constante.NumarCuvinteEstimatDictionar);

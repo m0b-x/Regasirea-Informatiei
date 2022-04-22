@@ -26,19 +26,18 @@ public class Document
     public static IEqualityComparer<Document> PathFisierComparer { get; } = new PathFisierEqualityComparer();
 
     private static readonly DictionarGlobal DictionarGlobal = new();
-    public static DocumentGlobal DocumentGlobal = new(DictionarGlobal);
+    public static DocumentGlobal DocumentGlobal = new(ref DictionarGlobal);
 
     private static readonly EnglishStemmer StemmerCuvinte = new();
     public string Titlu { get; private set; }
-
-    public List<string> Topicuri { get; } = new List<string>();
+    public List<string> Topicuri { get; set; } = new List<string>();
 
     public int FrecventaMaxima { get; private set; } = 1 ;
-
-    public double EntropieTotala;
+    
     public Dictionary<string, int> DictionarCuvinte { get; } = new(Constante.NumarCuvinteEstimatDocument);
 
-    private readonly StringBuilder _documentNormalizat = new(Constante.NumarCuvinteEstimatDocument);
+    public readonly StringBuilder DocumentNormalizat =
+        new(Constante.NumarCuvinteEstimatDocument * Constante.LungimeMedieCuvant);
     
     public readonly string PathFisier;
     
@@ -52,50 +51,44 @@ public class Document
         if (DocumentGlobal.ListaDocumenteNormalizate.Contains(this))
         {
             DocumentGlobal.ListaDocumenteNormalizate.TryGetValue(this,out var documentGasit);
-            if (documentGasit != null)
-            {
-                FrecventaMaxima = documentGasit.FrecventaMaxima;
-                DictionarCuvinte = documentGasit.DictionarCuvinte;
-                _documentNormalizat = documentGasit._documentNormalizat;
-            }
+            FrecventaMaxima = documentGasit!.FrecventaMaxima;
+            DictionarCuvinte = documentGasit.DictionarCuvinte;
+            DocumentNormalizat = documentGasit.DocumentNormalizat;
         }
         else
         {
-            CitesteDate();
+            if(DocumentGlobal.EsteNevoieDeSuprascriere == false)
+                DocumentGlobal.EsteNevoieDeSuprascriere = true;
+            CitesteDateDinFisier();
         }
     }
 
     public Document(StringBuilder documentNormalizat)
     {
         Titlu =  string.Empty;
-        _documentNormalizat = documentNormalizat;
+        DocumentNormalizat = documentNormalizat;
         var dateDocument = documentNormalizat.ToString().Split(Constante.SimbolTitlu);
 
         PathFisier = dateDocument[0];
-        
         var dateCaString = dateDocument[1].Split(Constante.DelimitatorIndexFrecventa, StringSplitOptions.RemoveEmptyEntries);
-        List<int> dateCaNumere = new(Constante.NumarCuvinteEstimatDocument);
 
-        for (int index=0;index<dateCaString.Length;index++)
+        for (int index=0;index<dateCaString.Length-1;index+=2)
         {
-            dateCaNumere.Add(int.Parse(dateCaString[index]));
+            DictionarCuvinte.Add(
+                DictionarGlobal.ListaCuvinte[UInt16.Parse(dateCaString[index])],
+                UInt16.Parse(dateCaString[index + 1]) );
         }
+
         var topicuri = dateDocument[^1].Split(Constante.DelimitatorTopicuri);
         for (int index = 0; index < dateDocument.Length-1; index++)
         {
-            Topicuri.Add(topicuri[index]);
-        }
-        
-        for (var index = 0; index < dateCaNumere.Count - 1; index += 2)
-        {
-            AdaugaCuvantDistinctInDictionar(DictionarGlobal.ListaCuvinte[dateCaNumere[index]], dateCaNumere[index + 1],
-                DictionarCuvinte);
+            AdaugaTopic(topicuri[index]);
         }
     }
 
 
 
-    private void CitesteDate()
+    private void CitesteDateDinFisier()
     {
         var continutFisier = new StringBuilder(Constante.NumarCuvinteEstimatDocument*Constante.LungimeMedieCuvant);
         using (var cititorXml = new XmlTextReader(PathFisier))
@@ -118,8 +111,8 @@ public class Document
                             {
                                 if (data.Contains("bip:"))
                                 {
-                                    string clasa = data.Split(Constante.DelimitatorClaseCitire)[1];
-                                    Topicuri.Add(clasa);
+                                    string topic = data.Split(Constante.DelimitatorClaseCitire)[1];
+                                    AdaugaTopic(topic);
                                 }
                             }
                             break;
@@ -128,39 +121,47 @@ public class Document
             }
         }
 
-        continutFisier.Replace(Constante.inceputParagraf,Constante.inlocuitorParagrf);
-        continutFisier.Replace(Constante.sfarsitParagraf,Constante.inlocuitorParagrf);
+        continutFisier.Replace(Constante.InceputParagraf,Constante.InlocuitorParagrf);
+        continutFisier.Replace(Constante.SfarsitParagraf,Constante.InlocuitorParagrf);
         RealizeazaNormalizareaDocumentului(continutFisier.ToString());
         RealizeazaFormaVectoriala();
     }
 
-    private void AdaugaCuvantDistinctInDictionar(string cuvant, int frecventa, Dictionary<string, int> dictionar)
+    private void AdaugaTopic(string topic)
     {
-        dictionar.Add(cuvant, frecventa);
+        Topicuri.Add(topic);
+        if (!DocumentGlobal.ToateTopicurile.ContainsKey(topic))
+        {
+            DocumentGlobal.ToateTopicurile.Add(topic, 1);
+        }
+        else
+        {
+            DocumentGlobal.ToateTopicurile[topic]++;
+        }
     }
     private void RealizeazaFormaVectoriala()
     {
-        _documentNormalizat.Append($"{PathFisier}{Constante.SimbolTitlu} ");
+        DocumentNormalizat.Append($"{PathFisier}{Constante.SimbolTitlu} ");
 
         
         foreach (var cuvant in DictionarCuvinte)
         {
-            _documentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
+            DocumentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
         }
 
         
-        _documentNormalizat.Append("#_");
+        DocumentNormalizat.Append("#_");
         foreach (var topic in Topicuri)
         {
-            _documentNormalizat.Append($"{topic}_");
+            DocumentNormalizat.Append($"{topic}_");
         }
-        DocumentGlobal.AdaugaDocumentInLista(_documentNormalizat.ToString());
+        DocumentGlobal.AdaugaDocumentInLista(DocumentNormalizat.ToString());
     }
 
     private void AdaugaCuvantInDictionar(string cuvant)
     { 
             DictionarGlobal.AdaugaCuvantInLista(cuvant);
-            DocumentGlobal.AdaugaAtributInListaDinDocument(cuvant);
+            
             AdaugaCuvantDistinctInDictionar(cuvant, DictionarCuvinte);
     }
     private void RealizeazaNormalizareaDocumentului(string continutFisier)
@@ -213,6 +214,7 @@ public class Document
 
     public static void ScrieDateInFisiereGlobale()
     {
+        Console.WriteLine("DA");
         DictionarGlobal.ScrieCuvinteleInFisier();
         DocumentGlobal.ScrieDate();
     }

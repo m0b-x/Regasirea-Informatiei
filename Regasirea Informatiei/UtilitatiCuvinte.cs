@@ -16,22 +16,9 @@ public static class UtilitatiCuvinte
         return true;
     }
 
-    public static string InlocuiestePunctuatia(this string s)
+    public static string InlocuiestePunctuatia(this string document)
     {
-        var cuvantFaraPunctuatie = new StringBuilder();
-        foreach (var c in s)
-            if (!char.IsPunctuation(c))
-                cuvantFaraPunctuatie.Append(c);
-            else
-                cuvantFaraPunctuatie.Append(Constante.DelimitatorGeneral);
-        return cuvantFaraPunctuatie.ToString();
-    }
-
-    public static bool EsteAbreviere(string cuvant)
-    {
-        if (cuvant.All(char.IsUpper))
-            return true;
-        return false;
+        return Regex.Replace(document, @"[^\w\s]", Constante.InlocuitorPunctuatie);
     }
 
     public static bool AreCaractereSpeciale(string cuvant)
@@ -42,11 +29,5 @@ public static class UtilitatiCuvinte
     private static bool ContineCifre(string cuvant)
     {
         return Regex.IsMatch(cuvant, @"\d");
-    }
-    public static string StergeSpatiile(string cuvant)
-    {
-        return new string(cuvant.ToCharArray()
-            .Where(c => !char.IsWhiteSpace(c))
-            .ToArray());
     }
 }
