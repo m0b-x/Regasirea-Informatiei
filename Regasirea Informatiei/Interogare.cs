@@ -35,15 +35,15 @@ public class Interogare
         var cuvinte = continutiterogare.InlocuiestePunctuatia().ToLowerInvariant()
             .Split(Constante.DelimitatorGeneral, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-        for (int index = 0; index < cuvinte.Count; index++)
+        foreach (var cuvantNetransformat in cuvinte)
         {
-            if (UtilitatiCuvinte.EsteCuvantValid(cuvinte[index]))
+            if (UtilitatiCuvinte.EsteCuvantValid(cuvantNetransformat))
             {
-                if (!DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvinte[index]))
+                if (!DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvantNetransformat))
                 {
-                    string cuvant = ReturneazaRadacinaCuvantului(cuvinte[index]);
-                    AdaugaCuvantInDictionarNormalizat(DictionarGlobal.ListaCuvinte.IndexOf(cuvant), DictionarNormalizat);
-                    AdaugaCuvantDistinctInDictionar(cuvant, DictionarCuvinte);
+                    string cuvantTransformat = ReturneazaRadacinaCuvantului(cuvantNetransformat);
+                    AdaugaCuvantInDictionarNormalizat(DictionarGlobal.ListaCuvinte.IndexOf(cuvantTransformat), DictionarNormalizat);
+                    AdaugaCuvantDistinctInDictionar(cuvantTransformat, DictionarCuvinte);
                 }
             }
         }

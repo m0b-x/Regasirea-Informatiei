@@ -7,11 +7,9 @@ const string patternFisier = "*.xml";
 var cronometru = new Stopwatch();
 cronometru.Start();
 
-HashSet<Document> documente = new HashSet<Document>(Constante.NumarDocumenteEstimat,Document.PathFisierComparer);
 foreach (var pathFisier in Directory.EnumerateFiles(numeFolder, patternFisier))
 {
-        Document document = new Document(pathFisier);
-        documente.Add(document);
+        _ = new Document(pathFisier);
 }
 
 cronometru.Stop();

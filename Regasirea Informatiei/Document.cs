@@ -29,8 +29,8 @@ public class Document
     public static DocumentGlobal DocumentGlobal = new(ref DictionarGlobal);
 
     private static readonly EnglishStemmer StemmerCuvinte = new();
-    public string Titlu { get; private set; }
-    public List<string> Topicuri { get; set; } = new List<string>();
+    private string Titlu { get; set; }
+    private List<string> Topicuri { get; set; } = new List<string>();
 
     public int FrecventaMaxima { get; private set; } = 1 ;
     
@@ -48,9 +48,9 @@ public class Document
     {
         PathFisier = pathFisier;
         Titlu = string.Empty;
-        if (DocumentGlobal.ListaDocumenteNormalizate.TryGetValue(this,out var documentGasit) == true)
+        if (DocumentGlobal.ListaDocumenteNormalizate.TryGetValue(this,out var documentGasit))
         {
-            FrecventaMaxima = documentGasit!.FrecventaMaxima;
+            FrecventaMaxima = documentGasit.FrecventaMaxima;
             DictionarCuvinte = documentGasit.DictionarCuvinte;
             DocumentNormalizat = documentGasit.DocumentNormalizat;
         }
@@ -69,6 +69,7 @@ public class Document
         var dateDocument = documentNormalizat.ToString().Split(Constante.SimbolTitlu);
 
         PathFisier = dateDocument[0];
+        
         var dateCaString = dateDocument[1].Split(Constante.DelimitatorIndexFrecventa, StringSplitOptions.RemoveEmptyEntries);
 
         for (int index=0;index<dateCaString.Length-1;index+=2)
@@ -149,7 +150,7 @@ public class Document
         }
 
         
-        DocumentNormalizat.Append("#_");
+        DocumentNormalizat.Append(Constante.DelimitatorClase);
         foreach (var topic in Topicuri)
         {
             DocumentNormalizat.Append($"{topic}_");
@@ -168,13 +169,13 @@ public class Document
         var cuvinte = continutFisier.InlocuiestePunctuatia().ToLowerInvariant()
             .Split(Constante.DelimitatorGeneral, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-        for (int index = 0; index < cuvinte.Count; index++)
+        foreach (var cuvant in cuvinte)
         {
-            if (UtilitatiCuvinte.EsteCuvantValid(cuvinte[index]))
+            if (UtilitatiCuvinte.EsteCuvantValid(cuvant))
             {
-                if (!DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvinte[index]))
+                if (!DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvant))
                 {
-                    AdaugaCuvantInDictionar(ReturneazaRadacinaCuvantului(cuvinte[index]));
+                    AdaugaCuvantInDictionar(ReturneazaRadacinaCuvantului(cuvant));
                 }
             }
         }

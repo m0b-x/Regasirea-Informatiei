@@ -6,7 +6,6 @@ public class Interogator
 {
     private readonly DocumentGlobal _documentGlobal;
     private readonly Dictionary<string, double> _dictionarIdf = new(Constante.NumarCuvinteUniceEstimat);
-
     private readonly Dictionary<int, int> _dictionarAparitiiInDocumente = new(Constante.NumarCuvinteUniceEstimat);
 
     private readonly Dictionary<string, Dictionary<int, double>> _dictionarDocumenteNormalizate =
@@ -124,7 +123,7 @@ public class Interogator
         return 0;
     }
 
-    public void RealizeazaVectoriiNormalizatiDeAtribute()
+    private void RealizeazaVectoriiNormalizatiDeAtribute()
     {
         foreach (var document in _documentGlobal.ListaDocumenteNormalizate)
         {
@@ -201,7 +200,7 @@ public class Interogator
                    atribut);
     }
 
-    public int ReturneazaNrDocumenteCuAtributul(string atribut)
+    private int ReturneazaNrDocumenteCuAtributul(string atribut)
     {
         var indexCuvant = _documentGlobal.DictionarGlobal.ListaCuvinte.IndexOf(atribut);
         if (!_dictionarAparitiiInDocumente.ContainsKey(indexCuvant))

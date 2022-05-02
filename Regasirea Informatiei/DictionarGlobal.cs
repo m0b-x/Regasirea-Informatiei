@@ -2,8 +2,8 @@ namespace Regasirea_Informatiei;
 
 public class DictionarGlobal
 {
-    public DictionarStopWords DictionarStopWords = new ();
-    public string NumeFisier { get; } = "Dictionar.txt";
+    public readonly DictionarStopWords DictionarStopWords = new ();
+    private string NumeFisier { get; } = "Dictionar.txt";
 
     public List<string> ListaCuvinte { get; } = new(Constante.NumarCuvinteEstimatDictionar);
 

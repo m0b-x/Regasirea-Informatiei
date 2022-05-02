@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Regasirea_Informatiei;
@@ -21,7 +20,7 @@ public static class UtilitatiCuvinte
         return Regex.Replace(document, @"[^\w\s]", Constante.InlocuitorPunctuatie);
     }
 
-    public static bool AreCaractereSpeciale(string cuvant)
+    private static bool AreCaractereSpeciale(string cuvant)
     {
         return  Regex.IsMatch(cuvant,("[^a-zA-Z0-9_.]"));
     }

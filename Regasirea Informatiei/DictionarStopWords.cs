@@ -17,10 +17,8 @@ public class DictionarStopWords
 
     private void CitesteDate()
     {
-        using (var cititorCuvinte = new StreamReader(_numeFisier))
-        {
-            var cuvinte = cititorCuvinte.ReadToEnd().Split(SeparatorCitire, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var cuvant in cuvinte) ListaStopWords.Add(cuvant);
-        }
+        using var cititorCuvinte = new StreamReader(_numeFisier);
+        var cuvinte = cititorCuvinte.ReadToEnd().Split(SeparatorCitire, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var cuvant in cuvinte) ListaStopWords.Add(cuvant);
     }
 }

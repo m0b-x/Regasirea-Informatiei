@@ -44,12 +44,11 @@ public class DocumentGlobal
         {
             var linie = cititor.ReadLine() ?? throw new InvalidOperationException();
 
-
-            if (linie.StartsWith(Constante.SimbolAtribut))
+            if (linie.StartsWith(Constante.DelimitareAtribut))
             {
-                DictionarGlobal.ListaCuvinte.Add(linie.Substring(1));
+                DictionarGlobal.ListaCuvinte.Add(linie.Substring(Constante.DelimitareAtribut.Length+1));
             }
-            else if (!string.IsNullOrWhiteSpace(linie))
+            else if(!linie.StartsWith('@'))
             {
                 _listaDocumenteNormalizate.Add(new Document(new StringBuilder(linie)));
             }
@@ -64,9 +63,9 @@ public class DocumentGlobal
             using var scriitor = new StreamWriter(_numeFisier, false);
             scriitor.AutoFlush = true;
             SortedSet<string> listaAtributeSortate = new(DictionarGlobal.ListaCuvinte);
-            foreach (var atribut in listaAtributeSortate) scriitor.WriteLine($"{Constante.SimbolAtribut}{atribut}");
+            foreach (var atribut in listaAtributeSortate) scriitor.WriteLine($"{Constante.DelimitareAtribut} {atribut}");
 
-            scriitor.WriteLine("@data");
+            scriitor.WriteLine(Constante.SimbolDate);
 
             foreach (var document in _listaDocumenteNormalizate)
             {
