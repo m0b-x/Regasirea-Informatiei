@@ -29,7 +29,6 @@ public class Document
     public static DocumentGlobal DocumentGlobal = new(ref DictionarGlobal);
 
     private static readonly EnglishStemmer StemmerCuvinte = new();
-    private string Titlu { get; set; }
     private List<string> Topicuri { get; set; } = new List<string>();
 
     public int FrecventaMaxima { get; private set; } = 1 ;
@@ -47,7 +46,6 @@ public class Document
     public Document(string pathFisier)
     {
         PathFisier = pathFisier;
-        Titlu = string.Empty;
         if (DocumentGlobal.ListaDocumenteNormalizate.TryGetValue(this,out var documentGasit))
         {
             FrecventaMaxima = documentGasit.FrecventaMaxima;
@@ -64,7 +62,6 @@ public class Document
 
     public Document(StringBuilder documentNormalizat)
     {
-        Titlu =  string.Empty;
         DocumentNormalizat = documentNormalizat;
         var dateDocument = documentNormalizat.ToString().Split(Constante.SimbolTitlu);
 
@@ -103,13 +100,16 @@ public class Document
                             continutFisier.Append(cititorXml.ReadElementContentAsString());
                             break;
                         case "title":
-                            Titlu = cititorXml.ReadElementContentAsString();
+                            cititorXml.ReadElementContentAsString();
                             break;
                         case "metadata":
-                            var metadata =cititorXml.ReadInnerXml().Split(Environment.NewLine);
+                            
+                            var metadata =cititorXml.ReadInnerXml().
+                                                        Split(Constante.DelimitatorInceputTopicuri)[1].
+                                                        Split(Environment.NewLine);
                             foreach (var data in metadata)
                             {
-                                if (data.Contains("bip:"))
+                                if (data.Contains("code code"))
                                 {
                                     string topic = data.Split(Constante.DelimitatorClaseCitire)[1];
                                     AdaugaTopic(topic);
@@ -168,9 +168,9 @@ public class Document
     {
         var cuvinte = continutFisier.InlocuiestePunctuatia().ToLowerInvariant()
             .Split(Constante.DelimitatorGeneral, StringSplitOptions.RemoveEmptyEntries).ToList();
-
-        foreach (var cuvant in cuvinte)
+        foreach (var cuvantNeschimbat in cuvinte)
         {
+            var cuvant = cuvantNeschimbat.Trim().InlocuiesteCifrele();
             if (UtilitatiCuvinte.EsteCuvantValid(cuvant))
             {
                 if (!DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvant))
@@ -203,7 +203,6 @@ public class Document
 
     public static void ScrieDateInFisiereGlobale()
     {
-        Console.WriteLine("DA");
         DictionarGlobal.ScrieCuvinteleInFisier();
         DocumentGlobal.ScrieDate();
     }

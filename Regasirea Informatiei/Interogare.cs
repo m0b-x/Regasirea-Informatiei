@@ -26,7 +26,6 @@ public class Interogare
     private void CitesteDate()
     {
         var continutiterogare = StringInterogare;
-
         TransformaInterogareInCuvinte(continutiterogare);
     }
 
@@ -34,15 +33,16 @@ public class Interogare
     {
         var cuvinte = continutiterogare.InlocuiestePunctuatia().ToLowerInvariant()
             .Split(Constante.DelimitatorGeneral, StringSplitOptions.RemoveEmptyEntries).ToList();
-
-        foreach (var cuvantNetransformat in cuvinte)
+        foreach (var cuvantNeschimbat in cuvinte)
         {
-            if (UtilitatiCuvinte.EsteCuvantValid(cuvantNetransformat))
+            var cuvant = cuvantNeschimbat.Trim().InlocuiesteCifrele();
+            if (UtilitatiCuvinte.EsteCuvantValid(cuvant))
             {
-                if (!DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvantNetransformat))
+                if (!DictionarGlobal.DictionarStopWords.ListaStopWords.Contains(cuvant))
                 {
-                    string cuvantTransformat = ReturneazaRadacinaCuvantului(cuvantNetransformat);
-                    AdaugaCuvantInDictionarNormalizat(DictionarGlobal.ListaCuvinte.IndexOf(cuvantTransformat), DictionarNormalizat);
+                    string cuvantTransformat = ReturneazaRadacinaCuvantului(cuvant);
+                    AdaugaCuvantInDictionarNormalizat(DictionarGlobal.ListaCuvinte.IndexOf(cuvantTransformat),
+                        DictionarNormalizat);
                     AdaugaCuvantDistinctInDictionar(cuvantTransformat, DictionarCuvinte);
                 }
             }
