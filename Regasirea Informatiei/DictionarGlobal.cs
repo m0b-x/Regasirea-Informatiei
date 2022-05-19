@@ -5,11 +5,11 @@ public class DictionarGlobal
     public readonly DictionarStopWords DictionarStopWords = new ();
     private string NumeFisier { get; } = "Dictionar.txt";
 
-    public List<string> ListaCuvinte { get; } = new(Constante.NumarCuvinteEstimatDictionar);
+    public List<string> ListaCuvinte { get; set; } = new(Constante.NumarCuvinteEstimatDictionar);
 
     public int MarimeDictionar => ListaCuvinte.Count;
     
-    private bool _esteNevoieDeSupraScriere;
+    public bool EsteNevoieDeSupraScriere { get; set; }
     
     public DictionarGlobal()
     {
@@ -20,7 +20,7 @@ public class DictionarGlobal
         else
         {
             File.Create(NumeFisier);
-            _esteNevoieDeSupraScriere = true;
+            EsteNevoieDeSupraScriere = true;
         }
     }
 
@@ -30,33 +30,30 @@ public class DictionarGlobal
         var cuvinte = cititorCuvinte.ReadToEnd().
             Split(Constante.DelimitatorGeneral, StringSplitOptions.RemoveEmptyEntries);
 
-        foreach (var cuvant in cuvinte) ListaCuvinte.Add(cuvant);
+        foreach (var cuvant in cuvinte)
+        {
+            if(!ListaCuvinte.Contains(cuvant))
+                ListaCuvinte.Add(cuvant);
+        }
     }
 
     public void ScrieCuvinteleInFisier()
     {
-        if (_esteNevoieDeSupraScriere)
+        if (EsteNevoieDeSupraScriere)
         {
             using var scriitorCuvinte = new StreamWriter(NumeFisier, false);
             scriitorCuvinte.AutoFlush = true;
             foreach (var cuvant in ListaCuvinte) scriitorCuvinte.Write($"{cuvant} ");
         }
     }
-
-
-    public void AdaugaCuvinteInLista(IEnumerable<string> cuvinte)
-    {
-        foreach (var cuvant in cuvinte) AdaugaCuvantInLista(cuvant);
-        ListaCuvinte.Sort();
-    }
-
+    
     public void AdaugaCuvantInLista(string cuvant)
     {
         if (!ListaCuvinte.Contains(cuvant))
         {
-            if (_esteNevoieDeSupraScriere == false)
+            if (EsteNevoieDeSupraScriere == false)
             {
-                _esteNevoieDeSupraScriere = true;
+                EsteNevoieDeSupraScriere = true;
             }
             ListaCuvinte.Add(cuvant);
         }

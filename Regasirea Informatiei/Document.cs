@@ -29,13 +29,13 @@ public class Document
     public static DocumentGlobal DocumentGlobal = new(ref DictionarGlobal);
 
     private static readonly EnglishStemmer StemmerCuvinte = new();
-    private List<string> Topicuri { get; set; } = new List<string>();
+    public List<string> Topicuri { get; set; } = new List<string>();
 
     public int FrecventaMaxima { get; private set; } = 1 ;
     
     public Dictionary<string, int> DictionarCuvinte { get; } = new(Constante.NumarCuvinteEstimatDocument);
 
-    public readonly StringBuilder DocumentNormalizat =
+    public StringBuilder DocumentNormalizat =
         new(Constante.NumarCuvinteEstimatDocument * Constante.LungimeMedieCuvant);
     
     public readonly string PathFisier;
@@ -76,10 +76,10 @@ public class Document
                 UInt16.Parse(dateCaString[index + 1]) );
         }
 
-        var topicuri = dateDocument[^1].Split(Constante.DelimitatorTopicuri);
-        for (int index = 0; index < dateDocument.Length-1; index++)
+        var topicuri = dateDocument[^1].Split(Constante.DelimitatorTopicuri,StringSplitOptions.RemoveEmptyEntries);
+        foreach (var topic in topicuri)
         {
-            AdaugaTopic(topicuri[index]);
+            AdaugaTopic(topic);
         }
     }
 
@@ -100,7 +100,7 @@ public class Document
                             continutFisier.Append(cititorXml.ReadElementContentAsString());
                             break;
                         case "title":
-                            cititorXml.ReadElementContentAsString();
+                            continutFisier.Append($"{cititorXml.ReadElementContentAsString()} ");
                             break;
                         case "metadata":
                             
@@ -156,14 +156,45 @@ public class Document
             DocumentNormalizat.Append($"{topic}_");
         }
         DocumentGlobal.AdaugaDocumentInLista(DocumentNormalizat.ToString());
+    }    
+    public void RefaFormaVectoriala()
+    {
+        DocumentNormalizat = new StringBuilder(Constante.NumarCuvinteEstimatDocument * Constante.LungimeMedieCuvant);
+        DocumentNormalizat.Append($"{PathFisier}{Constante.SimbolTitlu} ");
+
+        
+        foreach (var cuvant in DictionarCuvinte)
+        {
+            if(DictionarGlobal.ListaCuvinte.Contains(cuvant.Key))
+                DocumentNormalizat.Append($"{DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key)}:{cuvant.Value} ");
+        }
+
+        
+        DocumentNormalizat.Append(Constante.DelimitatorClase);
+        foreach (var topic in Topicuri)
+        {
+            DocumentNormalizat.Append($"{topic}_");
+        }
+        DocumentGlobal.AdaugaDocumentInLista(DocumentNormalizat.ToString());
     }
 
+    public void RefaDictionarulDeCuvinte()
+    {
+        foreach (var cuvant in DictionarCuvinte)
+        {
+            if (!DictionarGlobal.ListaCuvinte.Contains(cuvant.Key))
+            {
+                DictionarCuvinte.Remove(cuvant.Key);
+            }
+        }
+    }
     private void AdaugaCuvantInDictionar(string cuvant)
     { 
             DictionarGlobal.AdaugaCuvantInLista(cuvant);
             
             AdaugaCuvantDistinctInDictionar(cuvant, DictionarCuvinte);
     }
+    
     private void RealizeazaNormalizareaDocumentului(string continutFisier)
     {
         var cuvinte = continutFisier.InlocuiestePunctuatia().ToLowerInvariant()
@@ -201,9 +232,9 @@ public class Document
 
     }
 
-    public static void ScrieDateInFisiereGlobale()
+    public static void ScrieDateleInFisiere()
     {
         DictionarGlobal.ScrieCuvinteleInFisier();
-        DocumentGlobal.ScrieDate();
+        DocumentGlobal.ScrieDocumenteleInFisier();
     }
 }

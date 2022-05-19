@@ -11,17 +11,16 @@ public class Interogator
     private readonly Dictionary<string, Dictionary<int, double>> _dictionarDocumenteNormalizate =
         new(Constante.NumarDocumenteEstimat);
 
-    private Dictionary<int, double> _dictionarInterogareNormalizat = new(Constante.NumarEstimatCuvinteInterogare);
+    private Dictionary<int, double> _dictionarInterogareNormalizat;
     private Interogare? _interogare;
 
     private readonly List<KeyValuePair<double, string>> _similaritateDocumente =
         new(Constante.NumarCuvinteEstimatDocument);
 
-    private double _entropieDocumente;
-
     public Interogator(ref DocumentGlobal documentGlobal)
     {
         _documentGlobal = documentGlobal;
+        _dictionarInterogareNormalizat = new(_documentGlobal.ListaDocumenteNormalizate.Count);
     }
 
     private string? PropozitieInterogare { get; set; }
@@ -44,7 +43,6 @@ public class Interogator
 
             if (EsteRelevantaInterogarea())
             {
-                CalculeazaEntropiaDocumentelor();
                 RealizeazaVectorulNormalizatAlInterogarii(_interogare);
                 RealizeazaVectoriiNormalizatiDeAtribute();
                 CalculeazaSimilaritateaDocumentelor();
@@ -59,38 +57,6 @@ public class Interogator
             }
         }
     }
-
-    private void CalculeazaEntropiaDocumentelor()
-    {
-        int nrTopicuriTotale = 0;
-
-        foreach (var tema in DocumentGlobal.ToateTopicurile)
-        {
-            nrTopicuriTotale += tema.Value;
-        }
-
-        foreach (var tema in DocumentGlobal.ToateTopicurile)
-        {
-            _entropieDocumente -= (double) tema.Value / nrTopicuriTotale *
-                                  Math.Log2((double) tema.Value / nrTopicuriTotale);
-        }
-
-        Console.WriteLine(_entropieDocumente);
-    }
-
-    public double CalculeazaCastigulInformatieiPentruAtributul(string atribut)
-    {
-        int aparitiileAtributuluiInDocumente = ReturneazaNrDocumenteCuAtributul(atribut);
-        int neaparitiileAtributului =
-            _documentGlobal.ListaDocumenteNormalizate.Count - aparitiileAtributuluiInDocumente;
-
-        double castig = _entropieDocumente -
-                        (double) aparitiileAtributuluiInDocumente / _documentGlobal.ListaDocumenteNormalizate.Count -
-                        (double) neaparitiileAtributului / _documentGlobal.ListaDocumenteNormalizate.Count;
-
-        return castig;
-    }
-
     private void AfiseazaSimilaritatile()
     {
         if (_similaritateDocumente.Count > 0)
@@ -154,11 +120,12 @@ public class Interogator
 
             foreach (var cuvant in document.DictionarCuvinte)
             {
-                var indexCuvant = _documentGlobal.DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key);
-                var frecventaCuvantuluiNormalizata =
-                    CalculeazaFrecventaCuvantuluiInDocument(_documentGlobal.DictionarGlobal.ListaCuvinte[indexCuvant],
-                        document);
-                frecventeNormalizate.Add(indexCuvant, frecventaCuvantuluiNormalizata);
+                    var indexCuvant = _documentGlobal.DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key);
+                    var frecventaCuvantuluiNormalizata =
+                        CalculeazaFrecventaCuvantuluiInDocument(
+                            _documentGlobal.DictionarGlobal.ListaCuvinte[indexCuvant],
+                            document);
+                    frecventeNormalizate.Add(indexCuvant, frecventaCuvantuluiNormalizata);
             }
 
             _dictionarDocumenteNormalizate.Add(document.PathFisier, frecventeNormalizate);
@@ -170,16 +137,10 @@ public class Interogator
         Dictionary<int, double> frecventeNormalizate = new(Constante.NumarCuvinteEstimatDocument);
         foreach (var cuvant in interogare.DictionarCuvinte)
         {
-            if (_documentGlobal.DictionarGlobal.ListaCuvinte.Contains(cuvant.Key))
-            {
                 var frecventaCuvantuluiNormalizata = CalculeazaFrecventaCuvantuluiInInterogare(cuvant.Key, interogare);
-                frecventeNormalizate.Add(_documentGlobal.DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key),
-                    frecventaCuvantuluiNormalizata);
-            }
-            else
-            {
-                Console.WriteLine("#"+cuvant);
-            }
+                if(_documentGlobal.DictionarGlobal.ListaCuvinte.Contains(cuvant.Key))
+                    frecventeNormalizate.Add(_documentGlobal.DictionarGlobal.ListaCuvinte.IndexOf(cuvant.Key),
+                        frecventaCuvantuluiNormalizata);
         }
 
         _dictionarInterogareNormalizat = frecventeNormalizate;
